@@ -1,0 +1,14 @@
+spring:
+  security:
+    redirect-uri: "http://127.0.0.1:3000/"
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: test
+            client-secret: test
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: http://127.0.0.1:8087/realms/testrealm
