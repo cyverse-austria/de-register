@@ -1,6 +1,7 @@
 package com.cyverse.keycloak.irods.service;
 
-import com.cyverse.keycloak.irods.config.IrodsConfig;
+import com.cyverse.keycloak.http.ListenerHttpClient;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
@@ -8,37 +9,16 @@ import org.jboss.logging.Logger;
 import org.keycloak.models.UserModel;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 import java.util.Map;
 
 public class IrodsService {
     private static final Logger logger = Logger.getLogger(IrodsService.class);
-    private final IrodsConfig config;
+    private final ListenerHttpClient httpClient;
+    private static final String IRODS_ENDPOINT = "/api/users/irods";
 
-    // TODO Auth
-    public IrodsService(IrodsConfig config) {
-        this.config = config;
-    }
-
-    private HttpClient getHttpClient() {
-        return HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .connectTimeout(Duration.ofSeconds(20))
-                .build();
-    }
-
-    private HttpRequest getRequestPOST(String body) {
-        return HttpRequest.newBuilder()
-                .uri(URI.create(config.getIrodsHost() + "/api/users"))
-                .timeout(Duration.ofMinutes(1))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+    public IrodsService(ListenerHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     public void addIrodsUser(UserModel user) {
@@ -51,17 +31,23 @@ public class IrodsService {
 
         try {
             String jsonBody = mapper.writeValueAsString(data);
-            HttpResponse<String> response = getHttpClient().send(getRequestPOST(jsonBody), HttpResponse.BodyHandlers.ofString());
-            logger.debug("iRODS Client RESPONSE STATUS CODE: " + response.statusCode());
+
+            HttpResponse<String> response =
+                    httpClient.getHttpClient()
+                            .send(httpClient
+                                    .getRequestPOST(IRODS_ENDPOINT, jsonBody),
+                                    HttpResponse.BodyHandlers.ofString());
+
+            logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
 
             if (response.statusCode() == HttpStatus.SC_CREATED) {
                 logger.info("Successfully added user " + user.getUsername() + " to iRODS");
             }
-            logger.debug("iRODS Client RESPONSE BODY: " + response.body());
+            logger.debug("API Client RESPONSE BODY: " + response.body());
         } catch (JsonProcessingException jsonExc) {
-            logger.error("Got exception trying to build iRODS client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
+            logger.error("Got exception trying to build API body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
         } catch (IOException | InterruptedException httpExc) {
-            logger.error("Got exception from HTTP request to iRODS client: " + httpExc.getMessage());
+            logger.error("Got exception from HTTP request to API: " + httpExc.getMessage());
         }
     }
 }

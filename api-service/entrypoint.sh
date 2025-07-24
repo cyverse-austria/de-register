@@ -15,12 +15,12 @@ cat /root/.irods/irods_environment.json
 echo ""
 
 # Start interactive shell or java app
-if [[ $1 == "api" && -n $2 ]]; then
-    exec java -jar irods-client.jar $2
-elif [ $1 == "api" ]; then
+if [ "$1" = "api" ] && [ -n "$2" ]; then
+    exec java -jar api-service.jar "$2"
+elif [ "$1" = "api" ]; then
     # used for testing mostly, not recommended for production.
     # please give the config as arg when starting the container.
-    exec java -jar irods-client.jar irods-client-config.yml
+    exec java -jar api-service.jar api-service-config.yml
 else
     exec /bin/bash
 fi

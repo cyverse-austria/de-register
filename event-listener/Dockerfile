@@ -1,5 +1,6 @@
-FROM bitnami/keycloak:23
+FROM busybox
 
-COPY target/ /opt/bitnami/keycloak/providers/
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
 
-ENTRYPOINT ["/opt/bitnami/keycloak/bin/kc.sh", "start-dev"]
+COPY ./target/event-listener-${APP_VERSION}.jar /event-listener.jar

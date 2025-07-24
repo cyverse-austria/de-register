@@ -2,6 +2,9 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
+
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
@@ -21,8 +24,8 @@ RUN mkdir -p /root/.irods
 
 COPY entrypoint.sh /entrypoint.sh
 
-COPY target/irods-client.jar /irods-client.jar
-COPY src/main/resources/irods-client-config.yml /irods-client-config.yml
+COPY target/api-service-${APP_VERSION}.jar /api-service.jar
+COPY src/main/resources/api-service-config.yml /api-service-config.yml
 
 RUN chmod +x /entrypoint.sh
 

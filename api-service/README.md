@@ -1,18 +1,18 @@
-# iRODS CLI Docker Client
+# REST API Service for LDAP and iRODS registration
 
-This repository provides a Docker image to run the iRODS (Integrated Rule-Oriented Data System) command line client (iCommands) version **4.3.x** on Ubuntu 22.04.  
+This repository provides a REST API that can register a User to an LDAP server or iRODS.
+Also provides a Docker image to run the iRODS (Integrated Rule-Oriented Data System) command line client (iCommands) version **4.3.x** on Ubuntu 22.04.  
 It allows you to connect to an iRODS server from outside your local environment using environment variables to configure your connection.
-It can also deploy an iRODS REST API that can be queried for various tasks.
 
 ---
 
 ## Features
 
+- Java REST API based on Javalin library for triggering specific LDAP and iRODS actions
 - Ubuntu 22.04 base image
 - iRODS iCommands version 4.3.x installed via the official iRODS apt repository
 - Dynamically generates `irods_environment.json` from environment variables at container start
 - Interactive bash shell with iRODS commands ready to use
-- Java REST API based on Javalin library for triggering specific iRODS actions
 
 ---
 
@@ -30,62 +30,40 @@ It can also deploy an iRODS REST API that can be queried for various tasks.
 Clone this repository and run:
 
 ```bash
-docker build -t irods-client-slim .
+docker build -t api-service .
 ```
 
 ### Run the Docker Container 
 Run the container with your iRODS server credentials passed via environment variables:
 
-- Option 1: To get into the interactive shell with access to the iRODS server:
-```bash
-docker run -it \
-  -e IRODS_HOST=irods.ies.example.com \
-  -e IRODS_USER_NAME=your_username \
-  -e IRODS_ZONE_NAME=your_zone \
-  irods-client-slim
-```
-
-- Option 2: To start the REST API - the same command as before with the argument **api**
+- Option 1: To start the REST API with the repository default configuration:
 
 ```bash
 docker run -it \
   -e IRODS_HOST=irods.ies.example.com \
   -e IRODS_USER_NAME=your_username \
   -e IRODS_ZONE_NAME=your_zone \
-  irods-client-slim api
+  api-service api
 ```
 
-### Authenticate
-
-Inside the container, run:
-
-```bash
-iinit
-```
-
-### Example iRODS commands
-```bash
-ils             # List files and directories in current iRODS directory
-iput file.txt   # Upload a file to iRODS
-iget file.txt   # Download a file from iRODS
-icd /path       # Change directory in iRODS
-```
-
-### Optional: Mount a local directory
-To easily upload or download files between your host and the container, mount a local directory:
+- Option 2: To start the REST API with a custom configuration:
 
 ```bash
 docker run -it \
-  -v $PWD:/data \
-  -e IRODS_HOST=your.irods.server \
+  -e IRODS_HOST=irods.ies.example.com \
   -e IRODS_USER_NAME=your_username \
   -e IRODS_ZONE_NAME=your_zone \
-  irods-client-slim
+  api-service api <your-config-file>.yml
 ```
 
-Inside the container:
-
+- Option 3: To get into the interactive shell with access to the iRODS server:
 ```bash
-cd /data
-iput your_local_file.txt 
+docker run -it \
+  -e IRODS_HOST=irods.ies.example.com \
+  -e IRODS_USER_NAME=your_username \
+  -e IRODS_ZONE_NAME=your_zone \
+  api-service
 ```
+
+The Dockerfile is based on the Dockerfile of this repository https://github.com/cyverse-austria/irods-client. More information
+about iRODS workflows there.
