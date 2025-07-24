@@ -1,4 +1,6 @@
-# Services needed to fully register a new user that logs through keycloak in cyverse
+# de-register
+
+Services needed to fully register a new user that logs through keycloak in cyverse
 
 ## event-listener
 Keycloak plugin that captures user data and sends it to a REST API

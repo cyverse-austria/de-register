@@ -1,0 +1,9 @@
+irodsServiceConfig:
+  password: "test"
+  ipcServices: true
+ldapServiceConfig:
+  host: "ldap://192.168.31.115:389/"
+  admin: "cn=Manager,dc=example,dc=org"
+  password: "notreal"
+  baseDN: "dc=example,dc=org"
+  everyoneGroup: "everyone"

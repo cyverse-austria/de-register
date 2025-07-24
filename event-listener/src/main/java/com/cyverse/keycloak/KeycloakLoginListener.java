@@ -47,7 +47,8 @@ public class KeycloakLoginListener implements EventListenerProvider {
         }
         UserModel user = session.users().getUserById(session.getContext().getRealm(), event.getUserId());
 
-        if (user != null && !Objects.equals(user.getUsername(), "admin")) {
+        // TODO Come up with a better way of avoiding admin users.
+        if (user != null && !user.getUsername().contains("admin")) {
             performLdapActions(user);
             performIrodsActions(user);
         }

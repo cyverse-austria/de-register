@@ -1,10 +1,13 @@
-package com.cyverse.irods;
+package com.cyverse.api;
 
-import com.cyverse.irods.config.IrodsClientConfig;
-import com.cyverse.irods.controllers.HealthController;
-import com.cyverse.irods.controllers.IrodsController;
-import com.cyverse.irods.exceptions.ExceptionHandler;
-import com.cyverse.irods.services.IrodsService;
+import com.cyverse.api.config.ApiServiceConfig;
+import com.cyverse.api.config.IrodsServiceConfig;
+import com.cyverse.api.controllers.HealthController;
+import com.cyverse.api.controllers.IrodsController;
+import com.cyverse.api.controllers.LdapController;
+import com.cyverse.api.exceptions.ExceptionHandler;
+import com.cyverse.api.services.IrodsService;
+import com.cyverse.api.services.LdapService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.javalin.Javalin;
@@ -35,13 +38,19 @@ public class Application {
         HealthController healthController = new HealthController();
         app.get("/", healthController::getHealthy);
 
-        IrodsService irodsService = new IrodsService(loadConfig(configFile));
+        ApiServiceConfig appConfig = loadConfig(configFile);
+        IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
         IrodsController irodsController = new IrodsController(irodsService);
-        app.post("/api/users/", irodsController::addIrodsUser);
+        app.post("/api/users/irods", irodsController::addIrodsUser);
+
+        LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
+        ldapService.init();
+        LdapController ldapController = new LdapController(ldapService);
+        app.post("/api/users/ldap", ldapController::addLdapUser);
     }
 
-    private static IrodsClientConfig loadConfig(String filePath) throws Exception {
+    private static ApiServiceConfig loadConfig(String filePath) throws Exception {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        return mapper.readValue(new File(filePath), IrodsClientConfig.class);
+        return mapper.readValue(new File(filePath), ApiServiceConfig.class);
     }
 }

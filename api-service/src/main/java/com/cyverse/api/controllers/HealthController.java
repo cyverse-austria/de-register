@@ -1,6 +1,5 @@
-package com.cyverse.irods.controllers;
+package com.cyverse.api.controllers;
 
-import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 

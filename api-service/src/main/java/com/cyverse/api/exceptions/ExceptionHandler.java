@@ -1,6 +1,6 @@
-package com.cyverse.irods.exceptions;
+package com.cyverse.api.exceptions;
 
-import com.cyverse.irods.controllers.IrodsController;
+import com.cyverse.api.controllers.IrodsController;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import org.slf4j.Logger;
@@ -12,7 +12,12 @@ public class ExceptionHandler {
 
     public static void handle(Javalin app) {
         // HTTP exceptions
-        app.exception(IrodsController.IrodsException.class, (e, ctx) -> {
+        app.exception(ResourceAlreadyExistsException.class, (e, ctx) -> {
+            logger.warn("Resource already exists: {}", e.getMessage());
+            ctx.status(HttpStatus.CONFLICT);
+        });
+
+        app.exception(UserException.class, (e, ctx) -> {
             logger.error("Bad request error: {}", e.getMessage());
             ctx.status(HttpStatus.BAD_REQUEST);
         });

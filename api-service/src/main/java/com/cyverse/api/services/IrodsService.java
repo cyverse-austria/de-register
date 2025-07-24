@@ -1,6 +1,6 @@
-package com.cyverse.irods.services;
+package com.cyverse.api.services;
 
-import com.cyverse.irods.config.IrodsClientConfig;
+import com.cyverse.api.config.IrodsServiceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +12,10 @@ import java.util.List;
 
 public class IrodsService {
     private static final Logger logger = LoggerFactory.getLogger(IrodsService.class);
-    private IrodsClientConfig config;
+    private IrodsServiceConfig irodsConfig;
 
-    public IrodsService(IrodsClientConfig config) {
-        this.config = config;
+    public IrodsService(IrodsServiceConfig irodsConfig) {
+        this.irodsConfig = irodsConfig;
     }
 
     private void runProcess(List<String> command) throws
@@ -40,7 +40,7 @@ public class IrodsService {
                 Arrays.asList(
                         "bash", "-c",
                         "echo "
-                                + config.getIrodsPassword()
+                                + irodsConfig.getPassword()
                                 + " | iinit; iadmin mkuser "
                                 + username
                                 + " rodsuser");

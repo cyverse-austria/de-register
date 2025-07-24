@@ -1,7 +1,6 @@
 package com.cyverse.keycloak;
-import com.cyverse.keycloak.irods.config.IrodsConfig;
+import com.cyverse.keycloak.http.ListenerHttpClient;
 import com.cyverse.keycloak.irods.service.IrodsService;
-import com.cyverse.keycloak.ldap.config.LdapConfig;
 import com.cyverse.keycloak.ldap.service.LdapService;
 import org.keycloak.Config;
 import org.keycloak.events.EventListenerProvider;
@@ -22,29 +21,27 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
         return new KeycloakLoginListener(session, ldapService, irodsService);
     }
 
-    private void initLdap(Config.Scope config) {
-        LdapConfig ldapConfig = new LdapConfig(
-                config.get("ldap-host"),
-                config.get("ldap-admin"),
-                config.get("ldap-password"),
-                config.get("ldap-base-dn"),
-                config.get("ldap-everyone-group")
-        );
-        ldapConfig.verifyFieldsSet();
-        ldapService = new LdapService(ldapConfig);
-        ldapService.init();
-    }
-
-    private void initIrods(Config.Scope config) {
-        IrodsConfig irodsConfig = new IrodsConfig(config.get("irods-host"));
-        irodsConfig.verifyFieldsSet();
-        irodsService = new IrodsService(irodsConfig);
+    private void testConnection(ListenerHttpClient httpClient) {
+        int retries = 5;
+        while (retries-- != 0) {
+            try {
+                if (httpClient.testConnection()) {
+                    break;
+                }
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                throw new RuntimeException("HTTP Client not responding.");
+            }
+        }
     }
 
     @Override
     public void init(Config.Scope config) {
-        initLdap(config);
-        initIrods(config);
+        String host = config.get("api-service-host");
+        ListenerHttpClient httpClient = new ListenerHttpClient(host);
+        testConnection(httpClient);
+        irodsService = new IrodsService(httpClient);
+        ldapService = new LdapService(httpClient);
     }
 
     @Override
@@ -59,5 +56,4 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
     public String getId() {
         return "login-listener";
     }
-
 }
