@@ -1,6 +1,5 @@
 package com.cyverse.api.models;
 
-import com.cyverse.api.controllers.IrodsController;
 import com.cyverse.api.exceptions.UserException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -11,6 +10,7 @@ public class UserModel {
     private String firstName;
     private String lastName;
     private String email;
+    private String group;
 
     @JsonIgnore
     public void validateUsername() throws UserException {
