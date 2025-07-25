@@ -13,6 +13,9 @@ import javax.naming.directory.*;
 import java.util.Hashtable;
 import java.util.Optional;
 
+/**
+ * LDAP service based on javax.naming library.
+ */
 public class LdapService {
     private static final Logger logger = LoggerFactory.getLogger(LdapService.class);
     private final LdapServiceConfig ldapConfig;
@@ -39,7 +42,7 @@ public class LdapService {
      *
      * @param user the user to register in LDAP
      */
-    public void addLdapUser(UserModel user) throws ResourceAlreadyExistsException {
+    public void addLdapUser(UserModel user) throws ResourceAlreadyExistsException, NamingException {
         logger.debug("Try adding user to LDAP: {}", user.getUsername());
 
         String entryDN = "uid=" + user.getUsername() +",ou=People," + ldapConfig.getBaseDN();
@@ -56,6 +59,43 @@ public class LdapService {
                 throw new ResourceAlreadyExistsException("User already registered in LDAP");
             }
             logger.error("Error adding LDAP user: {}\n{} ", user.getUsername(), e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Add an existing user to an LDAP Group.
+     *
+     * @param username the user to add to the group
+     * @param group the group to add to
+     */
+    public void addLdapUserToGroup(String username, String group) throws ResourceAlreadyExistsException, NamingException {
+        logger.debug("Try adding user: {} to LDAP Group: {}", username, group);
+
+        String groupDn = "cn=" + group + ",ou=Groups," + ldapConfig.getBaseDN();
+
+        try {
+            DirContext ctx = new InitialDirContext(env);
+
+            ModificationItem[] mods = new ModificationItem[1];
+            mods[0] = new ModificationItem(
+                    DirContext.ADD_ATTRIBUTE,
+                    new BasicAttribute("memberUid", username)
+            );
+
+            ctx.modifyAttributes(groupDn, mods);
+
+            logger.info("LDAP user: {} added successfully to group: {}", username, group);
+
+            ctx.close();
+        } catch (NamingException e) {
+            if (e instanceof AttributeInUseException) {
+                String msg = "User is already a member of the group.";
+                logger.warn(msg);
+                throw new ResourceAlreadyExistsException(msg);
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -120,5 +160,4 @@ public class LdapService {
         }
         return Optional.empty();
     }
-
 }
