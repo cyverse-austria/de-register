@@ -42,11 +42,13 @@ public class Application {
         IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
         IrodsController irodsController = new IrodsController(irodsService);
         app.post("/api/users/irods", irodsController::addIrodsUser);
+        app.put("/api/users/irods", irodsController::grantUserAccess);
 
         LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
         ldapService.init();
         LdapController ldapController = new LdapController(ldapService);
         app.post("/api/users/ldap", ldapController::addLdapUser);
+        app.put("/api/users/ldap", ldapController::addLdapUserToGroup);
     }
 
     private static ApiServiceConfig loadConfig(String filePath) throws Exception {

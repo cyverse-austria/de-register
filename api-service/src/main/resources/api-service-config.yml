@@ -1,6 +1,7 @@
 irodsServiceConfig:
   password: "test"
-  ipcServices: true
+  zone: "TUG"
+  ipcServices: false
 ldapServiceConfig:
   host: "ldap://192.168.31.115:389/"
   admin: "cn=Manager,dc=example,dc=org"

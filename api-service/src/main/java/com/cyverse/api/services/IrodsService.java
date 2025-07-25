@@ -10,6 +10,9 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * iRODS Service based on commands ran via ProcessBuilder.
+ */
 public class IrodsService {
     private static final Logger logger = LoggerFactory.getLogger(IrodsService.class);
     private IrodsServiceConfig irodsConfig;
@@ -18,6 +21,39 @@ public class IrodsService {
         this.irodsConfig = irodsConfig;
     }
 
+    /**
+     * Add user in iRODS via iRODS commands.
+     * Only param necessary for now is the username.
+     */
+    public void addIrodsUser(String username) throws IOException, InterruptedException {
+        List<String> addUsercommand =
+                Arrays.asList(
+                        "bash", "-c",
+                        "echo "
+                                + irodsConfig.getPassword()
+                                + " | iinit; iadmin mkuser "
+                                + username
+                                + " rodsuser");
+        runProcess(addUsercommand);
+    }
+
+    /**
+<<<<<<< Updated upstream
+     * Grants initial necessary user access.
+=======
+     * Grants access for groups to user home directory.
+     *
+     * @param username the username to grant access to
+>>>>>>> Stashed changes
+     */
+    public void grantAccessToUser(String username) throws IOException, InterruptedException {
+        if (irodsConfig.getIpcServices()) {
+            runProcess(buildChModCommand("own", "ipcservices", username));
+        }
+        runProcess(buildChModCommand("own", "rodsadmin", username));
+    }
+
+    // TODO Revise error handling
     private void runProcess(List<String> command) throws
             InterruptedException, IOException {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
@@ -35,15 +71,14 @@ public class IrodsService {
         process.waitFor();
     }
 
-    public void addIrodsUser(String username) throws IOException, InterruptedException {
-        List<String> command =
-                Arrays.asList(
-                        "bash", "-c",
-                        "echo "
-                                + irodsConfig.getPassword()
-                                + " | iinit; iadmin mkuser "
-                                + username
-                                + " rodsuser");
-        runProcess(command);
+    private List<String> buildChModCommand(String permission, String group, String username) {
+        return Arrays.asList(
+                "bash", "-c",
+                "echo "
+                        + irodsConfig.getPassword()
+                        + " | iinit; ichmod "
+                        + permission + " " + group
+                        + " /" + irodsConfig.getZone() + "/home/" + username
+        );
     }
 }

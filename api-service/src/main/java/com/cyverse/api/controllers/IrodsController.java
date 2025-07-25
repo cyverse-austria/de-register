@@ -24,4 +24,12 @@ public class IrodsController {
         irodsService.addIrodsUser(user.getUsername());
         ctx.status(HttpStatus.CREATED);
     }
+
+    public void grantUserAccess(Context ctx)
+            throws IOException, InterruptedException, UserException {
+        UserModel user = ctx.bodyAsClass(UserModel.class);
+        user.validateUsername();
+        irodsService.grantAccessToUser(user.getUsername());
+        ctx.status(HttpStatus.OK);
+    }
 }

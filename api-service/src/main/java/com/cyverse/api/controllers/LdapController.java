@@ -7,6 +7,9 @@ import com.cyverse.api.services.LdapService;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
+import javax.naming.NamingException;
+import java.util.Map;
+
 public class LdapController {
     private LdapService ldapService;
 
@@ -14,10 +17,22 @@ public class LdapController {
         this.ldapService = ldapService;
     }
 
-    public void addLdapUser(Context ctx) throws UserException, ResourceAlreadyExistsException {
+    public void addLdapUser(Context ctx)
+            throws UserException, ResourceAlreadyExistsException, NamingException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         user.validateUsername();
         ldapService.addLdapUser(user);
         ctx.status(HttpStatus.CREATED);
+    }
+
+    public void addLdapUserToGroup(Context ctx)
+            throws UserException, ResourceAlreadyExistsException, NamingException {
+        UserModel request = ctx.bodyAsClass(UserModel.class);
+        request.validateUsername();
+        if (request.getGroup() == null) {
+            throw new UserException("Group is missing");
+        }
+        ldapService.addLdapUserToGroup(request.getUsername(), request.getGroup());
+        ctx.status(HttpStatus.OK);
     }
 }
