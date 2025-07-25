@@ -1,18 +1,20 @@
-FROM ubuntu:22.04
+FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
 
-RUN apt-get update && apt-get install -y \
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     curl \
     ca-certificates \
     gnupg \
     lsb-release \
     bash \
-    openjdk-17-jdk
+    openjdk-17-jdk-headless && \
+    rm -rf /var/lib/apt/lists/*
 
 # Add iRODS repo key and repo
 RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | apt-key add - && \
