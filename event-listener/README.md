@@ -3,7 +3,9 @@ Keycloak Event-Listener custom implementation that acts as a REST API Client and
 creation of LDAP and iRODS accounts based on information received from the user that authenticates through Keycloak.
 
 ## Configure inside Keycloak
-Select the target _realm_, go to _Realm settings_ -> _Events_, search and add **login-listener**. 
+Select the target _realm_, go to _Realm settings_ -> _Events_, search and add **login-listener**.
+<img width="1505" height="280" alt="image" src="https://github.com/user-attachments/assets/fd95f376-0e95-4e40-b2e5-a8878dd8784e" />
+
 
 ## Docker
 When building an image to a docker namespace, use **Dockerfile** (context: .). That is just a busybox container with the JAR copied inside of it.
