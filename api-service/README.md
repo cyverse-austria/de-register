@@ -30,7 +30,7 @@ It allows you to connect to an iRODS server from outside your local environment 
 Clone this repository and run:
 
 ```bash
-docker build -t api-service .
+docker build --build-arg APP_VERSION=0.0.1 -t api-service .
 ```
 
 ### Run the Docker Container 
