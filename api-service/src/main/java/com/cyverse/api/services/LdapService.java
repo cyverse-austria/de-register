@@ -11,6 +11,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
 import java.util.Hashtable;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -72,6 +73,11 @@ public class LdapService {
     public void addLdapUserToGroup(String username, String group) throws ResourceAlreadyExistsException, NamingException {
         logger.debug("Try adding user: {} to LDAP Group: {}", username, group);
 
+        // Get everyoneGroup from this config - to not duplicate ldap configs across services
+        if (Objects.equals(group, "everyone")) {
+            group = ldapConfig.getEveryoneGroup();
+        }
+        
         String groupDn = "cn=" + group + ",ou=Groups," + ldapConfig.getBaseDN();
 
         try {

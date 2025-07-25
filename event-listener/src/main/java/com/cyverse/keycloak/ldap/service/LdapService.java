@@ -60,4 +60,33 @@ public class LdapService {
         }
     }
 
+    public void addLdapUserToGroup(UserModel user, String group) {
+        logger.debug("Try adding user to LDAP: " + user.getUsername());
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> data = Map.of(
+                "username", user.getUsername(),
+                "group", group
+        );
+
+        try {
+            String jsonBody = mapper.writeValueAsString(data);
+
+            HttpResponse<String> response =
+                    httpClient.getHttpClient()
+                            .send(httpClient
+                                            .getRequestPUT(LDAP_ENDPOINT, jsonBody),
+                                    HttpResponse.BodyHandlers.ofString());
+
+            logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
+
+            if (response.statusCode() == HttpStatus.SC_CREATED) {
+                logger.info("Successfully added user " + user.getUsername() + " to LDAP group: " + group);
+            }
+        } catch (JsonProcessingException jsonExc) {
+            logger.error("Got exception trying to build API client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
+        } catch (IOException | InterruptedException httpExc) {
+            logger.error("Got exception from HTTP request to API client: " + httpExc.getMessage());
+        }
+    }
 }
