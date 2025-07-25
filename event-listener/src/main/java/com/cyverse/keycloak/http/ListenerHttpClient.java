@@ -36,6 +36,15 @@ public class ListenerHttpClient {
                 .build();
     }
 
+    public HttpRequest getRequestPUT(String endpoint, String body) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(host + endpoint))
+                .timeout(Duration.ofMinutes(1))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
+
     private HttpRequest getRequestHealthy() {
         return HttpRequest.newBuilder()
                 .uri(URI.create(host + HEALTH_ENDPOINT))
