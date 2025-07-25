@@ -76,6 +76,7 @@ public class LdapService {
         attrs.put("mail", user.getEmail());
         //TODO custom exception with message for empty optional
         attrs.put("uidNumber", getLastAssignedUid(ctx).orElseThrow());
+        // TODO Check and see if there is a better way to set the gidNumber
         attrs.put("gidNUmber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");

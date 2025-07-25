@@ -1,7 +1,7 @@
 # REST API Service for LDAP and iRODS registration
 
 This repository provides a REST API that can register a User to an LDAP server or iRODS.
-Also provides a Docker image to run the iRODS (Integrated Rule-Oriented Data System) command line client (iCommands) version **4.3.x** on Ubuntu 22.04.  
+Also provides a Docker image to run the iRODS (Integrated Rule-Oriented Data System) command line client (iCommands) version **4.3.1** on Ubuntu 22.04.  
 It allows you to connect to an iRODS server from outside your local environment using environment variables to configure your connection.
 
 ---
@@ -9,8 +9,8 @@ It allows you to connect to an iRODS server from outside your local environment 
 ## Features
 
 - Java REST API based on Javalin library for triggering specific LDAP and iRODS actions
-- Ubuntu 22.04 base image
-- iRODS iCommands version 4.3.x installed via the official iRODS apt repository
+- Ubuntu 24.04 base image
+- iRODS iCommands version 4.3.1 installed via the official iRODS apt repository
 - Dynamically generates `irods_environment.json` from environment variables at container start
 - Interactive bash shell with iRODS commands ready to use
 
@@ -18,7 +18,7 @@ It allows you to connect to an iRODS server from outside your local environment 
 
 ## Supported iRODS Version
 
-- iCommands client version: **4.3.x**  
+- iCommands client version: **4.3.1**  
 - Compatible with iRODS server versions 4.3.x and above
 
 ---
