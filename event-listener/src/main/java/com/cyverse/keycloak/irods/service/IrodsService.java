@@ -43,7 +43,35 @@ public class IrodsService {
             if (response.statusCode() == HttpStatus.SC_CREATED) {
                 logger.info("Successfully added user " + user.getUsername() + " to iRODS");
             }
-            logger.debug("API Client RESPONSE BODY: " + response.body());
+        } catch (JsonProcessingException jsonExc) {
+            logger.error("Got exception trying to build API body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
+        } catch (IOException | InterruptedException httpExc) {
+            logger.error("Got exception from HTTP request to API: " + httpExc.getMessage());
+        }
+    }
+
+    public void grantIrodsUserAccess(UserModel user) {
+        logger.debug("Try granting access to iRODS user: " + user.getUsername());
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> data = Map.of(
+                "username", user.getUsername()
+        );
+
+        try {
+            String jsonBody = mapper.writeValueAsString(data);
+
+            HttpResponse<String> response =
+                    httpClient.getHttpClient()
+                            .send(httpClient
+                                            .getRequestPUT(IRODS_ENDPOINT, jsonBody),
+                                    HttpResponse.BodyHandlers.ofString());
+
+            logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
+
+            if (response.statusCode() == HttpStatus.SC_OK) {
+                logger.info("Successfully granted initial access to user " + user.getUsername() + " in iRODS");
+            }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
         } catch (IOException | InterruptedException httpExc) {

@@ -28,10 +28,13 @@ public class KeycloakLoginListener implements EventListenerProvider {
 
     private void performLdapActions(UserModel user) {
         ldapService.addLdapUser(user);
+        ldapService.addLdapUserToGroup(user, "everyone");
+        ldapService.addLdapUserToGroup(user, "community");
     }
 
     private void performIrodsActions(UserModel user) {
         irodsService.addIrodsUser(user);
+        irodsService.grantIrodsUserAccess(user);
     }
 
     /**
