@@ -11,6 +11,7 @@ import javax.naming.NamingException;
 import java.util.Map;
 
 public class LdapController {
+
     private LdapService ldapService;
 
     public LdapController(LdapService ldapService) {
