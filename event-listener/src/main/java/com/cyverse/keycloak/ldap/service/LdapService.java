@@ -60,6 +60,12 @@ public class LdapService {
         }
     }
 
+    /**
+     * Adds already existing LDAP user to the specified group.
+     *
+     * @param user the user registered in LDAP
+     * @param group the group to add the user to
+     */
     public void addLdapUserToGroup(UserModel user, String group) {
         logger.debug("Try adding user to LDAP: " + user.getUsername());
 

@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingException;
 
-
+/**
+ * Exception handling in Javalin context.
+ */
 public class ExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionHandler.class);
 

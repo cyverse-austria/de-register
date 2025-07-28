@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
+/**
+ *  iRODS Service in Keycloak context.
+ */
 public class IrodsService {
     private static final Logger logger = Logger.getLogger(IrodsService.class);
     private final ListenerHttpClient httpClient;
@@ -21,6 +24,11 @@ public class IrodsService {
         this.httpClient = httpClient;
     }
 
+    /**
+     * Adds user to iRODS.
+     *
+     * @param user the UserModel that comes from Keycloak data-model
+     */
     public void addIrodsUser(UserModel user) {
         logger.debug("Try adding user to iRODS: " + user.getUsername());
 
@@ -50,6 +58,12 @@ public class IrodsService {
         }
     }
 
+    /**
+     * Grants access for specific groups/users to the user. The implementation
+     * details for this method are detailed in the API Source code and docs.
+     *
+     * @param user the already registered user in iRODS
+     */
     public void grantIrodsUserAccess(UserModel user) {
         logger.debug("Try granting access to iRODS user: " + user.getUsername());
 

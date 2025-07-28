@@ -23,7 +23,8 @@ public class IrodsService {
 
     /**
      * Add user in iRODS via iRODS commands.
-     * Only param necessary for now is the username.
+     *
+     * @param username the user to create account for in iRODS
      */
     public void addIrodsUser(String username) throws IOException, InterruptedException {
         List<String> addUsercommand =
@@ -38,13 +39,9 @@ public class IrodsService {
     }
 
     /**
-<<<<<<< Updated upstream
-     * Grants initial necessary user access.
-=======
      * Grants access for groups to user home directory.
      *
      * @param username the username to grant access to
->>>>>>> Stashed changes
      */
     public void grantAccessToUser(String username) throws IOException, InterruptedException {
         if (irodsConfig.getIpcServices()) {
@@ -53,7 +50,12 @@ public class IrodsService {
         runProcess(buildChModCommand("own", "rodsadmin", username));
     }
 
-    // TODO Revise error handling
+    /**
+     * Generic Java command runner based on ProcessBuilder.
+     * TODO Revise error handling by not merging stdout and stderr.
+     *
+     * @param command the command to run
+     */
     private void runProcess(List<String> command) throws
             InterruptedException, IOException {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));

@@ -77,7 +77,7 @@ public class LdapService {
         if (Objects.equals(group, "everyone")) {
             group = ldapConfig.getEveryoneGroup();
         }
-        
+
         String groupDn = "cn=" + group + ",ou=Groups," + ldapConfig.getBaseDN();
 
         try {
@@ -109,7 +109,7 @@ public class LdapService {
         Attribute objClass = new BasicAttribute("objectClass");
         objClass.add("inetOrgPerson");
         objClass.add("posixAccount");
-        //TODO set shadow properties?
+        // TODO set shadow properties?
         objClass.add("shadowAccount");
 
         Attributes attrs = new BasicAttributes(true);
@@ -120,7 +120,7 @@ public class LdapService {
         attrs.put("cn", user.getFirstName() + " " + user.getLastName());
         attrs.put("uid", user.getUsername());
         attrs.put("mail", user.getEmail());
-        //TODO custom exception with message for empty optional
+        // TODO custom exception with message for empty optional
         attrs.put("uidNumber", getLastAssignedUid(ctx).orElseThrow());
         // TODO Check and see if there is a better way to set the gidNumber
         attrs.put("gidNUmber", "10013");

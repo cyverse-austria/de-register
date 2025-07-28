@@ -4,6 +4,9 @@ import com.cyverse.api.exceptions.UserException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+/**
+ * User-model needed for iRODS and LDAP.
+ */
 @Data
 public class UserModel {
     private String username;
