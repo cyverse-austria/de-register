@@ -32,8 +32,8 @@ public class KeycloakLoginListener implements EventListenerProvider {
         // generic groups for all users
         ldapService.addLdapUserToGroup(user, "everyone");
         ldapService.addLdapUserToGroup(user, "community");
-        // discovery-environment specific group
-        ldapService.addLdapUserToGroup(user, "de-preview-access");
+        // TODO add to discovery-environment specific group "de-preview-access" ?
+        // see https://github.com/cyverse-de/portal2/blob/fcfecdfac381761d743fb4a312a6e779eec4397f/src/api/workflows/native/services.js#L23
     }
 
     private void performIrodsActions(UserModel user) {
