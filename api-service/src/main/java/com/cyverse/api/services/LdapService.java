@@ -126,6 +126,10 @@ public class LdapService {
         attrs.put("gidNUmber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
+        
+        // TODO Just for testing now. Decide if needed
+        attrs.put("title", "University/College Staff");
+        attrs.put("o", "Graz University of Technology");
 
         return attrs;
     }
