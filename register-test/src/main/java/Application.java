@@ -56,6 +56,8 @@ public class Application {
         client.setProtocol("openid-connect");
         client.setStandardFlowEnabled(true);
         client.setEnabled(true);
+
+        return client;
     }
 
     private static UserRepresentation getTestUser(String username) {

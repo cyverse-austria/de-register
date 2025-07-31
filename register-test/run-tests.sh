@@ -37,7 +37,7 @@ docker exec -i $db_container_id psql -U postgres -c "create database keycloak wi
 docker exec -i $db_container_id psql -U postgres -c "grant postgres to keycloak;"
 
 echo "Waiting for Keycloak to initialize"
-sleep 15
+sleep 20
 
 mvn clean package
 
