@@ -1,5 +1,5 @@
 irodsServiceConfig:
-  password: "test"
+  password: "ksasagrybisdRPY1M"
   zone: "TUG"
   ipcServices: false
 ldapServiceConfig:
