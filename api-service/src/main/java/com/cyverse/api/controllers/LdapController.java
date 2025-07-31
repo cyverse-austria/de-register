@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
 import javax.naming.NamingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 public class LdapController {
@@ -19,7 +20,8 @@ public class LdapController {
     }
 
     public void addLdapUser(Context ctx)
-            throws UserException, ResourceAlreadyExistsException, NamingException {
+            throws UserException, ResourceAlreadyExistsException,
+            NamingException, NoSuchAlgorithmException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         user.validateUsername();
         ldapService.addLdapUser(user);

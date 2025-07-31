@@ -8,3 +8,4 @@ ldapServiceConfig:
   password: "notreal"
   baseDN: "dc=example,dc=org"
   everyoneGroup: "everyone"
+  firstLoginPassword: "notreal"

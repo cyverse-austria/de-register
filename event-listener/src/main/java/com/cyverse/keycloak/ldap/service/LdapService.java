@@ -28,7 +28,7 @@ public class LdapService {
      *
      * @param user the UserModel that comes from Keycloak data-model
      */
-    public void addLdapUser(UserModel user) {
+    public boolean addLdapUser(UserModel user) {
         logger.debug("Try adding user to LDAP: " + user.getUsername());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -52,12 +52,14 @@ public class LdapService {
 
             if (response.statusCode() == HttpStatus.SC_CREATED) {
                 logger.info("Successfully added user " + user.getUsername() + " to LDAP");
+                return true;
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
         } catch (IOException | InterruptedException httpExc) {
             logger.error("Got exception from HTTP request to API client: " + httpExc.getMessage());
         }
+        return false;
     }
 
     /**
