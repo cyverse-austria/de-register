@@ -9,4 +9,5 @@ public class LdapServiceConfig {
     private String password;
     private String baseDN;
     private String everyoneGroup;
+    private String firstLoginPassword;
 }

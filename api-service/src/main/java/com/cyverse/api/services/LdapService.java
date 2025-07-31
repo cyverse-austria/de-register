@@ -10,6 +10,10 @@ import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Hashtable;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +47,9 @@ public class LdapService {
      *
      * @param user the user to register in LDAP
      */
-    public void addLdapUser(UserModel user) throws ResourceAlreadyExistsException, NamingException {
+    public void addLdapUser(UserModel user)
+            throws ResourceAlreadyExistsException, NamingException,
+            NoSuchAlgorithmException {
         logger.debug("Try adding user to LDAP: {}", user.getUsername());
 
         String entryDN = "uid=" + user.getUsername() +",ou=People," + ldapConfig.getBaseDN();
@@ -105,7 +111,7 @@ public class LdapService {
         }
     }
 
-    private Attributes getUserAttributes(DirContext ctx, UserModel user) {
+    private Attributes getUserAttributes(DirContext ctx, UserModel user) throws NoSuchAlgorithmException {
         Attribute objClass = new BasicAttribute("objectClass");
         objClass.add("inetOrgPerson");
         objClass.add("posixAccount");
@@ -126,7 +132,8 @@ public class LdapService {
         attrs.put("gidNUmber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
-        
+        attrs.put("userPassword", generateSSHAHash(ldapConfig.getFirstLoginPassword()));
+
         // TODO Just for testing now. Decide if needed
         attrs.put("title", "University/College Staff");
         attrs.put("o", "Graz University of Technology");
@@ -169,5 +176,25 @@ public class LdapService {
             logger.error("Error searching uids: {}", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    private String generateSSHAHash(String password) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+        byte[] passwordBytes = password.getBytes();
+
+        // salt
+        byte[] salt = new byte[4];
+        new SecureRandom().nextBytes(salt);
+
+        md.update(passwordBytes);
+        md.update(salt);
+
+        byte[] hashedPassword = md.digest();
+
+        byte[] combined = new byte[hashedPassword.length + salt.length];
+        System.arraycopy(hashedPassword, 0, combined, 0, hashedPassword.length);
+        System.arraycopy(salt, 0, combined, hashedPassword.length, salt.length);
+
+        return "{SSHA}" + Base64.getEncoder().encodeToString(combined);
     }
 }

@@ -27,11 +27,13 @@ public class KeycloakLoginListener implements EventListenerProvider {
         this.irodsService = irodsService;
     }
 
-    private void performLdapActions(UserModel user) {
-        ldapService.addLdapUser(user);
+    private boolean performLdapActions(UserModel user) {
+        boolean userCreated = ldapService.addLdapUser(user);
         // generic groups for all users
         ldapService.addLdapUserToGroup(user, "everyone");
         ldapService.addLdapUserToGroup(user, "community");
+
+        return userCreated;
         // TODO add to discovery-environment specific group "de-preview-access" ?
         // see https://github.com/cyverse-de/portal2/blob/fcfecdfac381761d743fb4a312a6e779eec4397f/src/api/workflows/native/services.js#L23
     }
@@ -59,8 +61,12 @@ public class KeycloakLoginListener implements EventListenerProvider {
         UserModel user = session.users().getUserById(sessionRealm, event.getUserId());
 
         if (user != null && !sessionRealm.getName().contains("master")) {
-            performLdapActions(user);
+            boolean userCreated = performLdapActions(user);
             performIrodsActions(user);
+
+            if (userCreated) {
+                user.setFederationLink("ldap");
+            }
         }
     }
 
