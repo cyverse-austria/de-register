@@ -48,7 +48,8 @@ public class LdapService {
      * @param user the user to register in LDAP
      */
     public void addLdapUser(UserModel user)
-            throws ResourceAlreadyExistsException, NamingException, NoSuchAlgorithmException {
+            throws ResourceAlreadyExistsException, NamingException,
+            NoSuchAlgorithmException {
         logger.debug("Try adding user to LDAP: {}", user.getUsername());
 
         String entryDN = "uid=" + user.getUsername() +",ou=People," + ldapConfig.getBaseDN();
@@ -110,8 +111,7 @@ public class LdapService {
         }
     }
 
-    private Attributes getUserAttributes(DirContext ctx, UserModel user)
-            throws NoSuchAlgorithmException {
+    private Attributes getUserAttributes(DirContext ctx, UserModel user) throws NoSuchAlgorithmException {
         Attribute objClass = new BasicAttribute("objectClass");
         objClass.add("inetOrgPerson");
         objClass.add("posixAccount");
@@ -133,6 +133,10 @@ public class LdapService {
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
         attrs.put("userPassword", generateSSHAHash(ldapConfig.getFirstLoginPassword()));
+
+        // TODO Just for testing now. Decide if needed
+        attrs.put("title", "University/College Staff");
+        attrs.put("o", "Graz University of Technology");
 
         return attrs;
     }
