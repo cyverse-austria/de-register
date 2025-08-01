@@ -1,12 +1,15 @@
 package com.cyverse.api.services;
 
 import com.cyverse.api.config.IrodsServiceConfig;
+import com.cyverse.api.exceptions.IrodsException;
+import com.cyverse.api.exceptions.ResourceAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,7 +29,17 @@ public class IrodsService {
      *
      * @param username the user to create account for in iRODS
      */
-    public void addIrodsUser(String username) throws IOException, InterruptedException {
+    public void addIrodsUser(String username)
+            throws IOException, InterruptedException,
+            IrodsException, ResourceAlreadyExistsException {
+        try {
+            runProcess(buildGetCommand(username));
+            // if GET command runs without errors, the user is already in iRODS
+            throw new ResourceAlreadyExistsException("User already registered in iRODS");
+        } catch (IrodsException e) {
+            logger.debug("User doesn't exist, will continue creation process");
+        }
+
         List<String> addUsercommand =
                 Arrays.asList(
                         "bash", "-c",
@@ -43,21 +56,36 @@ public class IrodsService {
      *
      * @param username the username to grant access to
      */
-    public void grantAccessToUser(String username) throws IOException, InterruptedException {
+    public void grantAccessToUser(String username) throws IOException,
+            InterruptedException, IrodsException, ResourceAlreadyExistsException {
+        String excMsg = "Group %s already has permission to user";
+
+        String permission = "own";
+        String group = "ipcservices";
+
         if (irodsConfig.getIpcServices()) {
-            runProcess(buildChModCommand("own", "ipcservices", username));
+            if (isOwnershipAlreadyPresent(username, group, permission)) {
+                throw new ResourceAlreadyExistsException(String.format(excMsg, group));
+            }
+            runProcess(buildChModCommand(permission, group, username));
         }
-        runProcess(buildChModCommand("own", "rodsadmin", username));
+
+        group = "rodsadmin";
+        if (isOwnershipAlreadyPresent(username, group, permission)) {
+            throw new ResourceAlreadyExistsException(String.format(excMsg, group));
+        }
+
+        runProcess(buildChModCommand(permission, group, username));
     }
 
     /**
      * Generic Java command runner based on ProcessBuilder.
-     * TODO Revise error handling by not merging stdout and stderr.
      *
      * @param command the command to run
+     * @return stdout+stderr lines
      */
-    private void runProcess(List<String> command) throws
-            InterruptedException, IOException {
+    private List<String> runProcess(List<String> command) throws
+            InterruptedException, IOException, IrodsException {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectErrorStream(true);
         Process process = pb.start();
@@ -65,12 +93,26 @@ public class IrodsService {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream())
         );
+
+        // init output reading context and read
         String line;
+        String errorLine = "";
+        List<String> outputLines = new ArrayList<>();
         while ((line = reader.readLine()) != null) {
-            logger.debug("iRODS Stdout + Stderr: {}", line);
+            if (line.contains("ERROR")) {
+                errorLine = line;
+            }
+            outputLines.add(line);
         }
 
         process.waitFor();
+
+        // throw here: after the process terminates to not cause memory leaks
+        if (!errorLine.isEmpty()) {
+            throw new IrodsException(errorLine);
+        }
+
+        return outputLines;
     }
 
     private List<String> buildChModCommand(String permission, String group, String username) {
@@ -81,6 +123,37 @@ public class IrodsService {
                         + " | iinit; ichmod "
                         + permission + " " + group
                         + " /" + irodsConfig.getZone() + "/home/" + username
+        );
+    }
+
+    private List<String> buildGetCommand(String username) {
+        return Arrays.asList(
+                "bash", "-c",
+                "echo "
+                        + irodsConfig.getPassword()
+                        + " | iinit; ils ../" + username
+        );
+    }
+
+    private boolean isOwnershipAlreadyPresent(String username, String group, String permission)
+            throws IrodsException, IOException, InterruptedException {
+        List<String> output = runProcess(buildGetOwnershipCommand(username));
+
+        for (String line: output) {
+            if (line.contains(group) && line.contains(permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private List<String> buildGetOwnershipCommand(String username) {
+        return Arrays.asList(
+                "bash", "-c",
+                "echo "
+                        + irodsConfig.getPassword()
+                        + " | iinit; ils -A ../" + username
         );
     }
 }

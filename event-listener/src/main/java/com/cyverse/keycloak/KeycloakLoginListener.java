@@ -2,6 +2,7 @@ package com.cyverse.keycloak;
 
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
@@ -16,6 +17,8 @@ import java.util.Objects;
  * Event-listener for LOGIN events.
  */
 public class KeycloakLoginListener implements EventListenerProvider {
+
+    private static final Logger logger = Logger.getLogger(KeycloakLoginListener.class);
 
     private final KeycloakSession session;
     private final LdapService ldapService;
@@ -57,6 +60,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
             return;
         }
 
+        logger.info("Event triggered login-listener");
         RealmModel sessionRealm = session.getContext().getRealm();
         UserModel user = session.users().getUserById(sessionRealm, event.getUserId());
 
