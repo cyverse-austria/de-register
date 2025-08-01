@@ -1,5 +1,7 @@
 package com.cyverse.api.controllers;
 
+import com.cyverse.api.exceptions.IrodsException;
+import com.cyverse.api.exceptions.ResourceAlreadyExistsException;
 import com.cyverse.api.exceptions.UserException;
 import com.cyverse.api.models.UserModel;
 import com.cyverse.api.services.IrodsService;
@@ -18,7 +20,8 @@ public class IrodsController {
     }
 
     public void addIrodsUser(Context ctx)
-            throws IOException, InterruptedException, UserException {
+            throws IOException, InterruptedException,
+            UserException, IrodsException, ResourceAlreadyExistsException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         user.validateUsername();
         irodsService.addIrodsUser(user.getUsername());
@@ -26,7 +29,8 @@ public class IrodsController {
     }
 
     public void grantUserAccess(Context ctx)
-            throws IOException, InterruptedException, UserException {
+            throws IOException, InterruptedException,
+            UserException, IrodsException, ResourceAlreadyExistsException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         user.validateUsername();
         irodsService.grantAccessToUser(user.getUsername());
