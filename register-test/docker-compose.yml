@@ -4,15 +4,16 @@ services:
     pull_policy: always
     restart: unless-stopped
     environment:
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
-      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
 
   keycloak:
     build:
-        context: .
+        context: ../event-listener/
+        dockerfile: Dockerfile.test
     restart: unless-stopped
     environment:
       KEYCLOAK_ADMIN: admin
@@ -22,6 +23,6 @@ services:
       KEYCLOAK_DATABASE_USER: keycloak
       KEYCLOAK_DATABASE_PORT: 5432
       KEYCLOAK_DATABASE_PASSWORD: keycloak
-      KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_API_SERVICE_HOST: http://129.27.224.145:7000
+      KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_API_SERVICE_HOST: http://192.168.31.115:7000
     ports:
       - "8087:8080"
