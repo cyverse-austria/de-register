@@ -25,8 +25,13 @@ public class ExceptionHandler {
             ctx.status(HttpStatus.BAD_REQUEST);
         });
 
+        app.exception(IrodsException.class, (e, ctx) -> {
+            logger.error("iRODS Error: {}", e.getMessage());
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+        });
+
         app.exception(NamingException.class, (e, ctx) -> {
-            logger.warn("LDAP Error: {}", e.getMessage());
+            logger.error("LDAP Error: {}", e.getMessage());
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
         });
 
