@@ -1,0 +1,5 @@
+kcUrl: "http://localhost:8087"
+ldapUrl: "ldap://192.168.31.115:389"
+ldapBindDn: "cn=Manager,dc=example,dc=org"
+ldapAdminPasswd: "notreal"
+ldapUsersDn: "ou=People,dc=example,dc=org"

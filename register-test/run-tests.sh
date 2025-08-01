@@ -45,7 +45,7 @@ mvn clean package
 if [ "$1" = "portal" ]; then
 
   echo "Creating Keycloak setup: realm, client, users."
-  java -jar target/register-test.jar portal 3000 $2
+  java -jar target/register-test.jar ./src/main/resources/test-config.yml portal 3000 $2
 
   docker exec -i $db_container_id psql -U postgres -c "create user portal_db_reader with password 'admin';"
   docker exec -i $db_container_id psql -U postgres -c "create database portal with owner portal_db_reader;"

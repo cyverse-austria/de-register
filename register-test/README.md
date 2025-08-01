@@ -16,7 +16,7 @@ The script will:
 - setup the 2 de-register services present in this repository and start them:
 api-service, event-listener.
 - additionally, the Java Application script will create a testing realm, a client for the
-service and testing users.
+service, testing users and an LDAP User federation based on the configuration file.
 - will start the configured service.
 - additional manual steps may still be required. These will be prompted at the end of the script.
 
