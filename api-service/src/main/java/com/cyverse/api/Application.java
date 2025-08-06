@@ -2,6 +2,7 @@ package com.cyverse.api;
 
 import com.cyverse.api.config.ApiServiceConfig;
 import com.cyverse.api.config.IrodsServiceConfig;
+import com.cyverse.api.config.LdapServiceConfig;
 import com.cyverse.api.controllers.HealthController;
 import com.cyverse.api.controllers.IrodsController;
 import com.cyverse.api.controllers.LdapController;
@@ -25,7 +26,7 @@ public class Application {
         try {
             initControllers(app, args[0]);
         } catch (Exception e) {
-            logger.error("Error at initialization {}", e.getMessage());
+            logger.error("Error at initialization: {}", e.getMessage());
             System.exit(1);
         }
 
@@ -38,14 +39,22 @@ public class Application {
         HealthController healthController = new HealthController();
         app.get("/", healthController::getHealthy);
 
+        // configs
         ApiServiceConfig appConfig = loadConfig(configFile);
-        IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
+        appConfig.verifyFieldsAreSet();
+        IrodsServiceConfig irodsConfig = appConfig.getIrodsServiceConfig();
+        LdapServiceConfig ldapConfig = appConfig.getLdapServiceConfig();
+
+        // services
+        IrodsService irodsService = new IrodsService(irodsConfig);
+        LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
+        ldapService.init();
+
+        // controllers
         IrodsController irodsController = new IrodsController(irodsService);
         app.post("/api/users/irods", irodsController::addIrodsUser);
         app.put("/api/users/irods", irodsController::grantUserAccess);
 
-        LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
-        ldapService.init();
         LdapController ldapController = new LdapController(ldapService);
         app.post("/api/users/ldap", ldapController::addLdapUser);
         app.put("/api/users/ldap", ldapController::addLdapUserToGroup);

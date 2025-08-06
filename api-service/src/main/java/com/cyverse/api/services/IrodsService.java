@@ -84,7 +84,7 @@ public class IrodsService {
      * @param command the command to run
      * @return stdout+stderr lines
      */
-    private List<String> runProcess(List<String> command) throws
+    protected List<String> runProcess(List<String> command) throws
             InterruptedException, IOException, IrodsException {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectErrorStream(true);
