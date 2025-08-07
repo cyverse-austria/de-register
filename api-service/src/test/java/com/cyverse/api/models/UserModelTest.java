@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class UserModelTest {
 
     @Test
-    void testValidUsernames() throws UserException {
+    void testValidUsernames() {
         UserModel user = new UserModel();
         user.setUsername("test_user1");
         Assertions.assertDoesNotThrow(user::validateUsername);
