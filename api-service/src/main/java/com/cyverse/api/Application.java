@@ -42,11 +42,9 @@ public class Application {
         // configs
         ApiServiceConfig appConfig = loadConfig(configFile);
         appConfig.verifyFieldsAreSet();
-        IrodsServiceConfig irodsConfig = appConfig.getIrodsServiceConfig();
-        LdapServiceConfig ldapConfig = appConfig.getLdapServiceConfig();
 
         // services
-        IrodsService irodsService = new IrodsService(irodsConfig);
+        IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
         LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
         ldapService.init();
 
