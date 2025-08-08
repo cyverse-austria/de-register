@@ -54,12 +54,8 @@ public class LdapService {
 
         String entryDN = "uid=" + user.getUsername() +",ou=People," + ldapConfig.getBaseDN();
         try {
-            DirContext ctx = new InitialDirContext(env);
-
-            ctx.createSubcontext(entryDN, getUserAttributes(ctx, user));
+            addEntryDN(entryDN, getUserAttributes(user));
             logger.info("LDAP user added successfully: {}", user.getUsername());
-
-            ctx.close();
         } catch (NamingException e) {
             if (e.getMessage().contains("Entry Already Exists")) {
                 logger.debug("User {} already registered in LDAP", user.getUsername());
@@ -87,19 +83,13 @@ public class LdapService {
         String groupDn = "cn=" + group + ",ou=Groups," + ldapConfig.getBaseDN();
 
         try {
-            DirContext ctx = new InitialDirContext(env);
-
             ModificationItem[] mods = new ModificationItem[1];
             mods[0] = new ModificationItem(
                     DirContext.ADD_ATTRIBUTE,
                     new BasicAttribute("memberUid", username)
             );
-
-            ctx.modifyAttributes(groupDn, mods);
-
+            modifyAttrs(groupDn, mods);
             logger.info("LDAP user: {} added successfully to group: {}", username, group);
-
-            ctx.close();
         } catch (NamingException e) {
             if (e instanceof AttributeInUseException) {
                 String msg = "User is already a member of the group.";
@@ -111,7 +101,21 @@ public class LdapService {
         }
     }
 
-    private Attributes getUserAttributes(DirContext ctx, UserModel user) throws NoSuchAlgorithmException {
+    protected void addEntryDN(String entryDN, Attributes attrs) throws NamingException {
+        DirContext ctx = new InitialDirContext(env);
+        // TODO custom exception with message for empty optional
+        attrs.put("uidNumber", getLastAssignedUid(ctx).orElseThrow());
+        ctx.createSubcontext(entryDN, attrs);
+        ctx.close();
+    }
+
+    protected void modifyAttrs(String name, ModificationItem[] items) throws NamingException {
+        DirContext ctx = new InitialDirContext(env);
+        ctx.modifyAttributes(name, items);
+        ctx.close();
+    }
+
+    private Attributes getUserAttributes(UserModel user) throws NoSuchAlgorithmException {
         Attribute objClass = new BasicAttribute("objectClass");
         objClass.add("inetOrgPerson");
         objClass.add("posixAccount");
@@ -126,8 +130,6 @@ public class LdapService {
         attrs.put("cn", user.getFirstName() + " " + user.getLastName());
         attrs.put("uid", user.getUsername());
         attrs.put("mail", user.getEmail());
-        // TODO custom exception with message for empty optional
-        attrs.put("uidNumber", getLastAssignedUid(ctx).orElseThrow());
         // TODO Check and see if there is a better way to set the gidNumber
         attrs.put("gidNUmber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
@@ -178,7 +180,7 @@ public class LdapService {
         return Optional.empty();
     }
 
-    private String generateSSHAHash(String password) throws NoSuchAlgorithmException {
+    protected String generateSSHAHash(String password) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-1");
         byte[] passwordBytes = password.getBytes();
 

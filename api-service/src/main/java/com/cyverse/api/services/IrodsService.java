@@ -62,10 +62,12 @@ public class IrodsService {
 
         String permission = "own";
         String group = "ipcservices";
+        ResourceAlreadyExistsException exc = null;
 
         if (irodsConfig.getIpcServices()) {
             if (isOwnershipAlreadyPresent(username, group, permission)) {
-                throw new ResourceAlreadyExistsException(String.format(excMsg, group));
+                exc = new ResourceAlreadyExistsException(String.format(excMsg, group));
+                logger.warn("ipcservices already has permission for user {}", username);
             }
             runProcess(buildChModCommand(permission, group, username));
         }
@@ -76,6 +78,11 @@ public class IrodsService {
         }
 
         runProcess(buildChModCommand(permission, group, username));
+
+        // TODO consider taking the group as request param to avoid this mess
+        if (exc != null) {
+            throw exc;
+        }
     }
 
     /**
@@ -84,7 +91,7 @@ public class IrodsService {
      * @param command the command to run
      * @return stdout+stderr lines
      */
-    private List<String> runProcess(List<String> command) throws
+    protected List<String> runProcess(List<String> command) throws
             InterruptedException, IOException, IrodsException {
         ProcessBuilder pb = new ProcessBuilder(command.toArray(String[]::new));
         pb.redirectErrorStream(true);
