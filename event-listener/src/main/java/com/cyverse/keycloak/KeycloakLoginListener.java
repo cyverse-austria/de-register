@@ -11,8 +11,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
-import java.util.Objects;
-
 /**
  * Event-listener for LOGIN events.
  */
@@ -30,13 +28,12 @@ public class KeycloakLoginListener implements EventListenerProvider {
         this.irodsService = irodsService;
     }
 
-    private boolean performLdapActions(UserModel user) {
-        boolean userCreated = ldapService.addLdapUser(user);
+    private void performLdapActions(UserModel user) {
+        ldapService.updateLdapUser(user);
         // generic groups for all users
         ldapService.addLdapUserToGroup(user, "everyone");
         ldapService.addLdapUserToGroup(user, "community");
 
-        return userCreated;
         // TODO add to discovery-environment specific group "de-preview-access" ?
         // see https://github.com/cyverse-de/portal2/blob/fcfecdfac381761d743fb4a312a6e779eec4397f/src/api/workflows/native/services.js#L23
     }
@@ -49,7 +46,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
 
     /**
      * Perform actions based on keycloak events.
-     * Actions supported in this implementation: LDAP User creation, iRODS account
+     * Actions supported in this implementation: LDAP User update, iRODS account
      * creation.
      *
      * @param event Event that triggers the actions
@@ -65,12 +62,8 @@ public class KeycloakLoginListener implements EventListenerProvider {
         UserModel user = session.users().getUserById(sessionRealm, event.getUserId());
 
         if (user != null && !sessionRealm.getName().contains("master")) {
-            boolean userCreated = performLdapActions(user);
+            performLdapActions(user);
             performIrodsActions(user);
-
-            if (userCreated) {
-                user.setFederationLink("ldap");
-            }
         }
     }
 

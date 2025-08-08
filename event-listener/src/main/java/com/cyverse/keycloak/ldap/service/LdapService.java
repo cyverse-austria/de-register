@@ -17,18 +17,19 @@ import java.util.Map;
 public class LdapService {
     private static final Logger logger = Logger.getLogger(LdapService.class);
     private final ListenerHttpClient httpClient;
-    private static final String LDAP_ENDPOINT = "/api/users/ldap";
+    private static final String LDAP_USERS_ENDPOINT = "/api/users/ldap";
+    private static final String LDAP_GROUPS_ENDPOINT = "/api/groups/ldap";
 
     public LdapService(ListenerHttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
     /**
-     * Adds user to LDAP.
+     * Sends all user data to LDAP api.
      *
      * @param user the UserModel that comes from Keycloak data-model
      */
-    public boolean addLdapUser(UserModel user) {
+    public void updateLdapUser(UserModel user) {
         logger.debug("Try adding user to LDAP: " + user.getUsername());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -45,21 +46,19 @@ public class LdapService {
             HttpResponse<String> response =
                     httpClient.getHttpClient()
                             .send(httpClient
-                                            .getRequestPOST(LDAP_ENDPOINT, jsonBody),
+                                            .getRequestPUT(LDAP_USERS_ENDPOINT, jsonBody),
                                     HttpResponse.BodyHandlers.ofString());
 
             logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
 
-            if (response.statusCode() == HttpStatus.SC_CREATED) {
-                logger.info("Successfully added user " + user.getUsername() + " to LDAP");
-                return true;
+            if (response.statusCode() == HttpStatus.SC_OK) {
+                logger.info("Successfully updated user " + user.getUsername() + " in LDAP");
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
         } catch (IOException | InterruptedException httpExc) {
             logger.error("Got exception from HTTP request to API client: " + httpExc.getMessage());
         }
-        return false;
     }
 
     /**
@@ -83,7 +82,7 @@ public class LdapService {
             HttpResponse<String> response =
                     httpClient.getHttpClient()
                             .send(httpClient
-                                            .getRequestPUT(LDAP_ENDPOINT, jsonBody),
+                                            .getRequestPUT(LDAP_GROUPS_ENDPOINT, jsonBody),
                                     HttpResponse.BodyHandlers.ofString());
 
             logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
