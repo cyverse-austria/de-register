@@ -59,6 +59,7 @@ public class LdapService {
             // extra attrs for LDAP Creation
             attrs.put("uid", user.getUsername());
             attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
+            attrs.put("mail", user.getEmail());
 
             addEntryDN(entryDN, attrs);
             logger.info("LDAP user added successfully: {}", user.getUsername());
@@ -168,34 +169,7 @@ public class LdapService {
         ctx.modifyAttributes(name, items);
         ctx.close();
     }
-
-    // TODO Consider moving these to a cfg file.
-    private Attributes getCommonUserAttributes(UserModel user) throws NoSuchAlgorithmException {
-        Attribute objClass = new BasicAttribute("objectClass");
-        objClass.add("posixAccount");
-        // TODO set shadow properties?
-        objClass.add("shadowAccount");
-
-        Attributes attrs = new BasicAttributes(true);
-
-        attrs.put(objClass);
-        attrs.put("givenName", user.getFirstName());
-        attrs.put("sn", user.getFirstName());
-        attrs.put("cn", user.getFirstName() + " " + user.getLastName());
-        attrs.put("mail", user.getEmail());
-        // TODO Check and see if there is a better way to set the gidNumber
-        attrs.put("gidNUmber", "10013");
-        attrs.put("homeDirectory", "/home/" + user.getUsername());
-        attrs.put("loginShell", "/bin/bash");
-        attrs.put("userPassword", generateSSHAHash(ldapConfig.getFirstLoginPassword()));
-
-        // TODO Just for testing now. Decide if needed
-        attrs.put("title", "University/College Staff");
-        attrs.put("o", "Graz University of Technology");
-
-        return attrs;
-    }
-
+    
     /**
      * Get last LDAP UID assigned to a user.
      * Build a context search, perform it and get the maximum UID present in the configured LDAP
@@ -251,5 +225,31 @@ public class LdapService {
         System.arraycopy(salt, 0, combined, hashedPassword.length, salt.length);
 
         return "{SSHA}" + Base64.getEncoder().encodeToString(combined);
+    }
+
+    // TODO Consider moving these to a cfg file.
+    private Attributes getCommonUserAttributes(UserModel user) throws NoSuchAlgorithmException {
+        Attribute objClass = new BasicAttribute("objectClass");
+        objClass.add("posixAccount");
+        // TODO set shadow properties?
+        objClass.add("shadowAccount");
+
+        Attributes attrs = new BasicAttributes(true);
+
+        attrs.put(objClass);
+        attrs.put("givenName", user.getFirstName());
+        attrs.put("sn", user.getFirstName());
+        attrs.put("cn", user.getFirstName() + " " + user.getLastName());
+        // TODO Check and see if there is a better way to set the gidNumber
+        attrs.put("gidNUmber", "10013");
+        attrs.put("homeDirectory", "/home/" + user.getUsername());
+        attrs.put("loginShell", "/bin/bash");
+        attrs.put("userPassword", generateSSHAHash(ldapConfig.getFirstLoginPassword()));
+
+        // TODO Just for testing now. Decide if needed
+        attrs.put("title", "University/College Staff");
+        attrs.put("o", "Graz University of Technology");
+
+        return attrs;
     }
 }
