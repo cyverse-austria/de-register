@@ -43,6 +43,36 @@ public class LdapService {
     }
 
     /**
+     * Adds user to LDAP, if it does not already exist.
+     *
+     * @param user the user to register in LDAP
+     */
+    public void addLdapUser(UserModel user)
+            throws ResourceAlreadyExistsException, NamingException,
+            NoSuchAlgorithmException {
+        logger.debug("Try adding user to LDAP: {}", user.getUsername());
+
+        String entryDN = "uid=" + user.getUsername() +",ou=People," + ldapConfig.getBaseDN();
+        try {
+            Attributes attrs = getCommonUserAttributes(user);
+
+            // extra attrs for LDAP Creation
+            attrs.put("uid", user.getUsername());
+            attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
+
+            addEntryDN(entryDN, attrs);
+            logger.info("LDAP user added successfully: {}", user.getUsername());
+        } catch (NamingException e) {
+            if (e.getMessage().contains("Entry Already Exists")) {
+                logger.debug("User {} already registered in LDAP", user.getUsername());
+                throw new ResourceAlreadyExistsException("User already registered in LDAP");
+            }
+            logger.error("Error adding LDAP user: {}\n{} ", user.getUsername(), e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
      * Adds attributes to an already existing LDAP user if it exists.
      *
      * @param user the user registered in LDAP
@@ -54,7 +84,7 @@ public class LdapService {
 
         String entryDN = "uid=" + user.getUsername() +",ou=People," + ldapConfig.getBaseDN();
         try {
-            Attributes attrs = getUserAttributes(user);
+            Attributes attrs = getCommonUserAttributes(user);
             ModificationItem[] newAttrs = new ModificationItem[attrs.size()+1];
             NamingEnumeration<?> resultedAttrs = attrs.getAll();
 
@@ -74,7 +104,7 @@ public class LdapService {
             if (e instanceof AttributeInUseException) {
                 throw new ResourceAlreadyExistsException("Attribute already in use: " + e.getMessage());
             }
-            logger.error("Error adding LDAP user: {}\n{} ", user.getUsername(), e.getMessage());
+            logger.error("Error updating LDAP user: {}\n{} ", user.getUsername(), e.getMessage());
             throw e;
         }
     }
@@ -114,6 +144,14 @@ public class LdapService {
         }
     }
 
+    protected void addEntryDN(String entryDN, Attributes attrs) throws NamingException {
+        DirContext ctx = new InitialDirContext(env);
+        // TODO custom exception with message for empty optional
+        attrs.put("uidNumber", getLastAssignedUid(ctx).orElseThrow());
+        ctx.createSubcontext(entryDN, attrs);
+        ctx.close();
+    }
+
     protected void modifyAttrsExtraOperation(String name, ModificationItem[] items) throws NamingException {
         DirContext ctx = new InitialDirContext(env);
         // TODO custom exception with message for empty optional
@@ -132,7 +170,7 @@ public class LdapService {
     }
 
     // TODO Consider moving these to a cfg file.
-    private Attributes getUserAttributes(UserModel user) throws NoSuchAlgorithmException {
+    private Attributes getCommonUserAttributes(UserModel user) throws NoSuchAlgorithmException {
         Attribute objClass = new BasicAttribute("objectClass");
         objClass.add("posixAccount");
         // TODO set shadow properties?

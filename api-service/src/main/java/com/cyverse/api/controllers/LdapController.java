@@ -18,6 +18,15 @@ public class LdapController {
         this.ldapService = ldapService;
     }
 
+    public void addLdapUser(Context ctx)
+            throws UserException, ResourceAlreadyExistsException,
+            NamingException, NoSuchAlgorithmException {
+        UserModel user = ctx.bodyAsClass(UserModel.class);
+        user.validateUsername();
+        ldapService.addLdapUser(user);
+        ctx.status(HttpStatus.CREATED);
+    }
+
     public void updateLdapUser(Context ctx)
             throws UserException, ResourceAlreadyExistsException,
             NamingException, NoSuchAlgorithmException {
