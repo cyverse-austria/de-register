@@ -19,8 +19,19 @@ A simple diagram that illustrates the basic flow of data for a CyVerse service l
 
 Because of the way Keycloak sessions work, creating the LDAP account **might not be sufficient** for the CyVerse service to work properly. To address this, make sure to have these setups in your Keycloak LDAP User federation:
 
+Keycloak instance -> your working realm -> User Federation -> Ldap
 - Edit mode: **WRITABLE**
+  <img width="1260" height="208" alt="image" src="https://github.com/user-attachments/assets/1e65de6d-1807-4dc5-80c0-34508601a10c" />
 - Sync Registration: **ON**
-- LDAP mapper first name, last name: 
+  <img width="1165" height="267" alt="image" src="https://github.com/user-attachments/assets/165e66e8-6e67-4cda-bce1-a5fc3344a24d" />
+
+
+Ldap -> Mappers
+<img width="1856" height="874" alt="image" src="https://github.com/user-attachments/assets/4ad307c1-9018-4c59-a4a4-3ad67e8ef453" />
+
+- mappers **first name** and **last name**: 
    - READ-ONLY **OFF**
    - Always Read Value from LDAP **OFF**
+     <img width="738" height="200" alt="image" src="https://github.com/user-attachments/assets/e001d17b-3d9a-477d-8c43-374d6b465fee" />
+
+  This will force the **event-listener** to capture the User data coming from SSO session, otherwise first name and last name would be empty, because Keycloak expects to read them from LDAP storage, but WRITABLE option does not automatically write them.
