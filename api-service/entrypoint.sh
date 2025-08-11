@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Generate irods_environment.json from environment variables
-cat > /root/.irods/irods_environment.json <<EOF
+cat > /home/cyverse/.irods/irods_environment.json <<EOF
 {
   "irods_host": "${IRODS_HOST}",
   "irods_port": 1247,
@@ -10,8 +10,8 @@ cat > /root/.irods/irods_environment.json <<EOF
 }
 EOF
 
-echo "Generated /root/.irods/irods_environment.json:"
-cat /root/.irods/irods_environment.json
+echo "Generated /home/cyverse/.irods/irods_environment.json:"
+cat /home/cyverse/.irods/irods_environment.json
 echo ""
 
 # Start interactive shell or java app
