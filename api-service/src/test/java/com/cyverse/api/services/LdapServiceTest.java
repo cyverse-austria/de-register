@@ -50,6 +50,7 @@ public class LdapServiceTest {
         Attributes attrs = buildCommonAttributes(user);
         attrs.put("uid", user.getUsername());
         attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
+        attrs.put("mail", user.getEmail());
 
         doNothing().when(ldapService).addEntryDN(expectedEntryDN, attrs);
 
@@ -73,6 +74,7 @@ public class LdapServiceTest {
         Attributes attrs = buildCommonAttributes(user);
         attrs.put("uid", user.getUsername());
         attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
+        attrs.put("mail", user.getEmail());
 
         NamingException e = new NamingException("Entry Already Exists");
         doThrow(e).when(ldapService).addEntryDN(expectedEntryDN, attrs);
@@ -214,7 +216,6 @@ public class LdapServiceTest {
         attrs.put("givenName", user.getFirstName());
         attrs.put("sn", user.getFirstName());
         attrs.put("cn", user.getFirstName() + " " + user.getLastName());
-        attrs.put("mail", user.getEmail());
         attrs.put("gidNUmber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");

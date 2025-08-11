@@ -9,6 +9,7 @@ import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.representations.idm.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Application {
@@ -40,6 +41,7 @@ public class Application {
                 .password("admin")
                 .build()) {
 
+            // --------- Realm --------
             System.out.println("Creating new realm: testrealm");
             RealmRepresentation rr = new RealmRepresentation();
             rr.setId(TEST_REALM);
@@ -49,6 +51,7 @@ public class Application {
             keycloak.realms().create(rr);
             System.out.println("Realm creation: done");
 
+            // ---------- Client ---------
             System.out.println("Adding new client: " + args[1]);
             String name = args[1];
             String port = args[2];
@@ -61,11 +64,13 @@ public class Application {
             logResponse(clientResp);
             System.out.println("Client add: done");
 
+            // ---------- Users ------------
             System.out.println("Adding test users");
             keycloak.realm(TEST_REALM).users().create(getTestUser("test_user1"));
             keycloak.realm(TEST_REALM).users().create(getTestUser("test_user2"));
             System.out.println("Testing users: done");
 
+            // ---------- LDAP --------------
             System.out.println("Adding LDAP Federation");
             RealmRepresentation repr = keycloak.realm(TEST_REALM).toRepresentation();
             Response ldapResp = keycloak.realm(TEST_REALM)
@@ -75,7 +80,40 @@ public class Application {
                             appConfig));
             logResponse(ldapResp);
             System.out.println("LDAP Federation: done");
+
+            System.out.println("Update LDAP mappers");
+            List<ComponentRepresentation> ldapProviders = keycloak.realm(TEST_REALM)
+                    .components()
+                    .query("testrealm", "org.keycloak.storage.UserStorageProvider", null);
+
+
+            ComponentRepresentation ldapProvider = ldapProviders.get(0);
+            String ldapProviderId = ldapProvider.getId();
+
+            List<ComponentRepresentation> mappers = keycloak.realm(TEST_REALM)
+                    .components()
+                    .query(ldapProviderId, "org.keycloak.storage.ldap.mappers.LDAPStorageMapper", null);
+            List<ComponentRepresentation> updatedMappers = updateLDAPMappers(mappers);
+
+            for (ComponentRepresentation mapper : updatedMappers) {
+                System.out.println("Updated " + mapper.getName() + " mapper");
+                keycloak.realm(TEST_REALM).components().component(mapper.getId()).update(mapper);
+            }
+            System.out.println("Update LDAP mappers done");
         }
+    }
+
+    private static List<ComponentRepresentation> updateLDAPMappers(List<ComponentRepresentation> mappers) {
+        List<ComponentRepresentation> updatedMappers = new ArrayList<>();
+        for (ComponentRepresentation mapper : mappers) {
+            if ("first name".equalsIgnoreCase(mapper.getName())
+                    || "last name".equalsIgnoreCase(mapper.getName())) {
+                mapper.getConfig().putSingle("read.only", "false");
+                mapper.getConfig().putSingle("always.read.value.from.ldap", "false");
+                updatedMappers.add(mapper);
+            }
+        }
+        return updatedMappers;
     }
 
     private static void logResponse(Response resp) {
