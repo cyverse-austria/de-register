@@ -34,6 +34,53 @@ public class LdapServiceTest {
     }
 
     @Test
+    void testAddLdapUser() throws NamingException, NoSuchAlgorithmException,
+            ResourceAlreadyExistsException {
+        UserModel user = new UserModel();
+        user.setUsername("test_user");
+        user.setEmail("test_user@test.com");
+        user.setFirstName("test");
+        user.setLastName("user");
+
+        doReturn("dc=example,dc=org").when(config).getBaseDN();
+        doReturn("testpass").when(config).getFirstLoginPassword();
+        doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
+
+        String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
+        Attributes attrs = buildCommonAttributes(user);
+        attrs.put("uid", user.getUsername());
+        attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
+
+        doNothing().when(ldapService).addEntryDN(expectedEntryDN, attrs);
+
+        ldapService.addLdapUser(user);
+        verify(ldapService, times(1)).addEntryDN(expectedEntryDN, attrs);
+    }
+
+    @Test
+    void testAddLdapUserAlreadyExists() throws NamingException, NoSuchAlgorithmException {
+        UserModel user = new UserModel();
+        user.setUsername("test_user");
+        user.setEmail("test_user@test.com");
+        user.setFirstName("test");
+        user.setLastName("user");
+
+        doReturn("dc=example,dc=org").when(config).getBaseDN();
+        doReturn("testpass").when(config).getFirstLoginPassword();
+        doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
+
+        String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
+        Attributes attrs = buildCommonAttributes(user);
+        attrs.put("uid", user.getUsername());
+        attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
+
+        NamingException e = new NamingException("Entry Already Exists");
+        doThrow(e).when(ldapService).addEntryDN(expectedEntryDN, attrs);
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> ldapService.addLdapUser(user));
+    }
+
+    @Test
     void testUpdateLdapUser() throws NamingException, NoSuchAlgorithmException,
             ResourceAlreadyExistsException {
         UserModel user = new UserModel();
@@ -139,6 +186,24 @@ public class LdapServiceTest {
     }
 
     private ModificationItem[] buildMods(UserModel user) throws NamingException {
+        Attributes attrs = buildCommonAttributes(user);
+        ModificationItem[] mods = new ModificationItem[attrs.size()+1];
+
+        NamingEnumeration<?> attrsIter = attrs.getAll();
+
+        int i = 0;
+        while (attrsIter.hasMore()) {
+            Attribute toAdd = (Attribute) attrsIter.next();
+            mods[i++] =
+                    new ModificationItem(
+                            DirContext.ADD_ATTRIBUTE,
+                            toAdd
+                    );
+        }
+        return mods;
+    }
+
+    private Attributes buildCommonAttributes(UserModel user) {
         Attribute objClass = new BasicAttribute("objectClass");
         objClass.add("posixAccount");
         objClass.add("shadowAccount");
@@ -157,17 +222,6 @@ public class LdapServiceTest {
         attrs.put("title", "University/College Staff");
         attrs.put("o", "Graz University of Technology");
 
-        ModificationItem[] mods = new ModificationItem[attrs.size()+1];
-        NamingEnumeration<?> attrsIter = attrs.getAll();
-        int i = 0;
-        while (attrsIter.hasMore()) {
-            Attribute toAdd = (Attribute) attrsIter.next();
-            mods[i++] =
-                    new ModificationItem(
-                            DirContext.ADD_ATTRIBUTE,
-                            toAdd
-                    );
-        }
-        return mods;
+        return attrs;
     }
 }
