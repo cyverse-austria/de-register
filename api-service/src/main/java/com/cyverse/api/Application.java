@@ -21,10 +21,20 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
-        Javalin app = Javalin.create()
-                .start(7000);
+        ApiServiceConfig appConfig = null;
         try {
-            initControllers(app, args[0]);
+            appConfig = loadConfig(args[0]);
+            appConfig.verifyFieldsAreSet();
+        } catch (Exception e) {
+            logger.error("Config could not be loaded. {}", e.getMessage());
+            System.exit(1);
+        }
+        
+        Javalin app = Javalin.create()
+                .start(appConfig.getPort());
+
+        try {
+            initControllers(app, appConfig);
         } catch (Exception e) {
             logger.error("Error at initialization: {}", e.getMessage());
             System.exit(1);
@@ -34,14 +44,10 @@ public class Application {
         logger.info("API started.");
     }
 
-    private static void initControllers(Javalin app, String configFile) throws Exception {
+    private static void initControllers(Javalin app, ApiServiceConfig appConfig) throws Exception {
         logger.info("Initializing controllers");
         HealthController healthController = new HealthController();
         app.get("/", healthController::getHealthy);
-
-        // configs
-        ApiServiceConfig appConfig = loadConfig(configFile);
-        appConfig.verifyFieldsAreSet();
 
         // services
         IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
