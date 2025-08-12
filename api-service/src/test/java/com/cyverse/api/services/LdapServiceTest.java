@@ -216,7 +216,7 @@ public class LdapServiceTest {
         attrs.put("givenName", user.getFirstName());
         attrs.put("sn", user.getFirstName());
         attrs.put("cn", user.getFirstName() + " " + user.getLastName());
-        attrs.put("gidNUmber", "10013");
+        attrs.put("gidNumber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
         attrs.put("userPassword", "{SSHA}testpasshashed1234");
