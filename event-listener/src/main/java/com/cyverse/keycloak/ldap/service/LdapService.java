@@ -87,7 +87,7 @@ public class LdapService {
 
             logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
 
-            if (response.statusCode() == HttpStatus.SC_CREATED) {
+            if (response.statusCode() == HttpStatus.SC_OK) {
                 logger.info("Successfully added user " + user.getUsername() + " to LDAP group: " + group);
             }
         } catch (JsonProcessingException jsonExc) {
