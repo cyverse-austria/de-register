@@ -241,7 +241,7 @@ public class LdapService {
         attrs.put("sn", user.getFirstName());
         attrs.put("cn", user.getFirstName() + " " + user.getLastName());
         // TODO Check and see if there is a better way to set the gidNumber
-        attrs.put("gidNUmber", "10013");
+        attrs.put("gidNumber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
         attrs.put("userPassword", generateSSHAHash(ldapConfig.getFirstLoginPassword()));
