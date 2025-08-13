@@ -12,6 +12,9 @@ import com.cyverse.api.services.LdapService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.javalin.Javalin;
+import io.javalin.openapi.plugin.OpenApiPlugin;
+import io.javalin.openapi.plugin.redoc.ReDocPlugin;
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +33,29 @@ public class Application {
             System.exit(1);
         }
         
-        Javalin app = Javalin.create()
+        Javalin app = Javalin.create(
+                config -> {
+                    config.registerPlugin(
+                            new OpenApiPlugin(openApiConfig ->
+                                openApiConfig
+                                    .withDocumentationPath("/openapi.json")
+                                    .withDefinitionConfiguration(
+                                            (version, openApiDefinition) ->
+                                            openApiDefinition
+                                                    .withInfo(openApiInfo ->
+                                                            openApiInfo
+                                                                    .description(
+                                                                            "API for creating LDAP and iRODS user accounts," +
+                                                                                    " including account registration and management")
+                                                    )
+
+                                    )));
+                    config.registerPlugin(new SwaggerPlugin(swaggerConfig ->
+                            swaggerConfig.setDocumentationPath("/openapi.json")));
+                    config.registerPlugin(new ReDocPlugin(redocConfig ->
+                            redocConfig.setDocumentationPath("/openapi.json")));
+                    }
+                )
                 .start(appConfig.getPort());
 
         try {
