@@ -72,4 +72,7 @@ about iRODS workflows there.
 <img width="1785" height="159" alt="image" src="https://github.com/user-attachments/assets/00c492f7-7028-4450-81a0-388fdb28db09" />
 Logs captured from Keycloak container.
 
-Note: Because a session LOGIN with Keycloak triggers **2 events**, the API will log (for a successful first login) a first batch of logs that will showcase the OK flow and a second batch that will display the CONFLICT flow (resource already exists) because the user was already added in during the first event trigger. 
+Note: Because a session LOGIN with Keycloak triggers **2 events**, the API will log (for a successful first login) a first batch of logs that will showcase the OK flow and a second batch that will display the CONFLICT flow (resource already exists) because the user was already added in during the first event trigger.
+
+## Swagger and ReDoc
+The API comes with [Swagger](https://swagger.io/) and [API documentation](https://swagger.io/blog/api-development/redoc-openapi-powered-documentation/) integrated. Once running, visit _http://<your_api_host>/swagger_ or _http://<your_api_host>/redoc_

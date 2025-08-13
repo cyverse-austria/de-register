@@ -6,6 +6,7 @@ import com.cyverse.api.models.UserModel;
 import com.cyverse.api.services.LdapService;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.openapi.*;
 
 import javax.naming.NamingException;
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +19,16 @@ public class LdapController {
         this.ldapService = ldapService;
     }
 
+    @OpenApi(
+            summary = "Create a new LDAP user account",
+            operationId = "addLdapUser",
+            path = "/api/users/ldap",
+            methods = HttpMethod.POST,
+            requestBody = @OpenApiRequestBody(
+                    content = {@OpenApiContent(from = UserModel.class)}
+            ),
+            responses = {@OpenApiResponse(status = "201")}
+    )
     public void addLdapUser(Context ctx)
             throws UserException, ResourceAlreadyExistsException,
             NamingException, NoSuchAlgorithmException {
@@ -27,6 +38,16 @@ public class LdapController {
         ctx.status(HttpStatus.CREATED);
     }
 
+    @OpenApi(
+            summary = "Update an existing LDAP user account",
+            operationId = "updateLdapUser",
+            path = "/api/users/ldap",
+            methods = HttpMethod.PUT,
+            requestBody = @OpenApiRequestBody(
+                    content = {@OpenApiContent(from = UserModel.class)}
+            ),
+            responses = {@OpenApiResponse(status = "200")}
+    )
     public void updateLdapUser(Context ctx)
             throws UserException, ResourceAlreadyExistsException,
             NamingException, NoSuchAlgorithmException {
@@ -36,6 +57,16 @@ public class LdapController {
         ctx.status(HttpStatus.OK);
     }
 
+    @OpenApi(
+            summary = "Adds an LDAP user to a specified LDAP group",
+            operationId = "addLdapUserToGroup",
+            path = "/api/groups/ldap",
+            methods = HttpMethod.PUT,
+            requestBody = @OpenApiRequestBody(
+                    content = {@OpenApiContent(from = UserModel.class)}
+            ),
+            responses = {@OpenApiResponse(status = "200")}
+    )
     public void addLdapUserToGroup(Context ctx)
             throws UserException, ResourceAlreadyExistsException, NamingException {
         UserModel request = ctx.bodyAsClass(UserModel.class);
