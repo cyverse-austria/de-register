@@ -58,8 +58,8 @@ public class LdapService {
 
             // extra attrs for LDAP Creation
             attrs.put("uid", user.getUsername());
-            attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
             attrs.put("mail", user.getEmail());
+            attrs.get("objectClass").add("inetOrgPerson");
 
             addEntryDN(entryDN, attrs);
             logger.info("LDAP user added successfully: {}", user.getUsername());

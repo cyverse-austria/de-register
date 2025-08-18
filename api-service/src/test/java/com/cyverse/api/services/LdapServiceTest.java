@@ -49,8 +49,8 @@ public class LdapServiceTest {
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
         Attributes attrs = buildCommonAttributes(user);
         attrs.put("uid", user.getUsername());
-        attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
         attrs.put("mail", user.getEmail());
+        attrs.get("objectClass").add("inetOrgPerson");
 
         doNothing().when(ldapService).addEntryDN(expectedEntryDN, attrs);
 
@@ -73,8 +73,8 @@ public class LdapServiceTest {
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
         Attributes attrs = buildCommonAttributes(user);
         attrs.put("uid", user.getUsername());
-        attrs.put("objectClass", attrs.get("objectClass").add("inetOrgPerson"));
         attrs.put("mail", user.getEmail());
+        attrs.get("objectClass").add("inetOrgPerson");
 
         NamingException e = new NamingException("Entry Already Exists");
         doThrow(e).when(ldapService).addEntryDN(expectedEntryDN, attrs);
