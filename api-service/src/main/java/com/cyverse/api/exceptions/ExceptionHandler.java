@@ -21,23 +21,31 @@ public class ExceptionHandler {
         });
 
         app.exception(UserException.class, (e, ctx) -> {
-            logger.error("Bad request error: {}", e.getMessage());
+            String msg = String.format("Bad request error: %s", e.getMessage());
+            logger.error(msg);
             ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(msg);
         });
 
         app.exception(IrodsException.class, (e, ctx) -> {
-            logger.error("iRODS Error: {}", e.getMessage());
+            String msg = String.format("iRODS Error: %s", e.getMessage());
+            logger.error(msg);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            ctx.json(msg);
         });
 
         app.exception(NamingException.class, (e, ctx) -> {
-            logger.error("LDAP Error: {}", e.getMessage());
+            String msg = String.format("LDAP Error: %s", e.getMessage());
+            logger.error(msg);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            ctx.json(msg);
         });
 
         app.exception(Exception.class, (e, ctx) -> {
-            logger.error("Internal server error: {}", e.getMessage());
+            String msg = String.format("Internal server error: %s", e.getMessage());
+            logger.error(msg);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            ctx.json(msg);
         });
     }
 }
