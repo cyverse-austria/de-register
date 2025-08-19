@@ -12,6 +12,8 @@ import io.javalin.openapi.*;
 import java.io.IOException;
 import java.util.Map;
 
+import static io.javalin.http.Header.AUTHORIZATION;
+
 public class IrodsController {
 
     private IrodsService irodsService;
@@ -21,14 +23,15 @@ public class IrodsController {
     }
 
     @OpenApi(
-            summary = "Create a new iRODS user account",
-            operationId = "addIrodsUser",
-            path = "/api/users/irods",
-            methods = HttpMethod.POST,
-            requestBody = @OpenApiRequestBody(
-                    content = {@OpenApiContent(from = UserModel.class)}
-            ),
-            responses = {@OpenApiResponse(status = "201")}
+        summary = "Create a new iRODS user account",
+        operationId = "addIrodsUser",
+        path = "/api/users/irods",
+        security = @OpenApiSecurity(name = "Bearer"),
+        methods = HttpMethod.POST,
+        requestBody = @OpenApiRequestBody(
+                content = {@OpenApiContent(from = UserModel.class)}
+        ),
+        responses = {@OpenApiResponse(status = "201")}
     )
     public void addIrodsUser(Context ctx)
             throws IOException, InterruptedException,
@@ -40,16 +43,17 @@ public class IrodsController {
     }
 
     @OpenApi(
-            summary = "Grant iRODS admin group access to a user's directory",
-            description = "Specific administration groups need access to " +
-                    "newly created irods users directories. This method provides that",
-            operationId = "grantUserAccess",
-            path = "/api/users/irods",
-            methods = HttpMethod.PUT,
-            requestBody = @OpenApiRequestBody(
-                    content = {@OpenApiContent(from = UserModel.class)}
-            ),
-            responses = {@OpenApiResponse(status = "200")}
+        summary = "Grant iRODS admin group access to a user's directory",
+        description = "Specific administration groups need access to " +
+                "newly created irods users directories. This method provides that",
+        operationId = "grantUserAccess",
+        path = "/api/users/irods",
+        security = @OpenApiSecurity(name = "Bearer"),
+        methods = HttpMethod.PUT,
+        requestBody = @OpenApiRequestBody(
+                content = {@OpenApiContent(from = UserModel.class)}
+        ),
+        responses = {@OpenApiResponse(status = "200")}
     )
     public void grantUserAccess(Context ctx)
             throws IOException, InterruptedException,

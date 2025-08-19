@@ -29,7 +29,8 @@ public class AuthService {
         this.users = users;
     }
 
-    public String generateToken(String mail, String password) throws UnauthorizedAccessException {
+    public String generateToken(String mail, String password)
+            throws UnauthorizedAccessException {
         List<Map.Entry<String, AuthUserConfig>> matchUsers = users.entrySet().stream()
                 .filter(u -> u.getValue().getMail().equals(mail)
                         && u.getValue().getPassword().equals(password))
@@ -52,12 +53,16 @@ public class AuthService {
     public void verifyToken(String token)
             throws UnauthorizedAccessException, JWTVerificationException,
             ApiTokenExpiredException {
+        if (token == null || token.isEmpty()) {
+            throw new UnauthorizedAccessException("Missing JWT token");
+        }
+
         Algorithm algorithm = Algorithm.HMAC256("mysecret");
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT decodedJWT = verifier.verify(token);
 
         if (!(users.containsKey(decodedJWT.getSubject())
-                && !Objects.equals(decodedJWT.getIssuer(), TOKEN_ISSUER))) {
+                && Objects.equals(decodedJWT.getIssuer(), TOKEN_ISSUER))) {
             throw new UnauthorizedAccessException("Unknown sub/issuer");
         }
 
