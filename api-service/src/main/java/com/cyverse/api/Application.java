@@ -3,10 +3,12 @@ package com.cyverse.api;
 import com.cyverse.api.config.ApiServiceConfig;
 import com.cyverse.api.config.IrodsServiceConfig;
 import com.cyverse.api.config.LdapServiceConfig;
+import com.cyverse.api.controllers.AuthController;
 import com.cyverse.api.controllers.HealthController;
 import com.cyverse.api.controllers.IrodsController;
 import com.cyverse.api.controllers.LdapController;
 import com.cyverse.api.exceptions.ExceptionHandler;
+import com.cyverse.api.services.AuthService;
 import com.cyverse.api.services.IrodsService;
 import com.cyverse.api.services.LdapService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,8 +80,12 @@ public class Application {
         IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
         LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
         ldapService.init();
+        AuthService authService = new AuthService(appConfig.getUsers());
 
         // controllers
+        AuthController authController = new AuthController(authService, appConfig.getApiKey());
+        app.post("/api/login", authController::login);
+
         IrodsController irodsController = new IrodsController(irodsService);
         app.post("/api/users/irods", irodsController::addIrodsUser);
         app.put("/api/users/irods", irodsController::grantUserAccess);

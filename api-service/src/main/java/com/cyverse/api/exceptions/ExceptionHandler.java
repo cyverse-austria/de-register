@@ -1,5 +1,6 @@
 package com.cyverse.api.exceptions;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import io.javalin.Javalin;
 import io.javalin.http.HttpStatus;
 import org.slf4j.Logger;
@@ -15,6 +16,20 @@ public class ExceptionHandler {
 
     public static void handle(Javalin app) {
         // HTTP exceptions
+        app.exception(UnauthorizedAccessException.class, (e, ctx) -> {
+            String msg = String.format("Forbidden access: %s", e.getMessage());
+            logger.error(msg);
+            ctx.status(HttpStatus.UNAUTHORIZED);
+            ctx.json(msg);
+        });
+
+        app.exception(JWTVerificationException.class, (e, ctx) -> {
+            String msg = String.format("Failed JWT verification: %s", e.getMessage());
+            logger.error(msg);
+            ctx.status(HttpStatus.UNAUTHORIZED);
+            ctx.json(msg);
+        });
+
         app.exception(ResourceAlreadyExistsException.class, (e, ctx) -> {
             logger.warn("Resource already exists: {}", e.getMessage());
             ctx.status(HttpStatus.CONFLICT);
