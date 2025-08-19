@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-service-swagger-config
+data:
+  config.yaml: |
+    port: 7000
+    irodsServiceConfig:
+      password: "<secret>"
+      zone: "TUG"
+      ipcServices: false
+    ldapServiceConfig:
+      host: "ldap://qa-openldap.cyverse.at/"
+      admin: "uid=ldap_writer,ou=People,dc=tugraz,dc=at"
+      password: "<secret>"
+      baseDN: "dc=tugraz,dc=at"
+      everyoneGroup: "everyone"
+      firstLoginPassword: "<secret>"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service-swagger
+  labels:
+    app: api-service-swagger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-service-swagger
+  template:
+    metadata:
+      labels:
+        app: api-service-swagger
+    spec:
+      containers:
+        - name: api-service-swagger
+          image: ghcr.io/cyverse-austria/de-register-api-service:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7000
+          args:
+            - "api"
+            - "/etc/api-service-swagger/config.yaml"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/api-service-swagger/config.yaml
+              subPath: config.yaml
+          env:
+            - name: IRODS_HOST
+              value: "qa-ies.cyverse.at"
+            - name: IRODS_USER_NAME
+              value: "portal"
+            - name: IRODS_ZONE_NAME
+              value: "TUG"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: api-service-swagger-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service-swagger-app
+spec:
+  selector:
+    app: api-service-swagger
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-service-swagger-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/auth-url: "https://auth.k3s.cyverse.at/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://auth.k3s.cyverse.at/oauth2/start?rd=https://$host$request_uri"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-Email,X-Auth-Request-User"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api-service-swagger.k3s.cyverse.at
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service-swagger-app
+                port:
+                  number: 7000
