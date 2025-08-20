@@ -43,6 +43,7 @@ docker run -it \
   -e IRODS_HOST=irods.ies.example.com \
   -e IRODS_USER_NAME=your_username \
   -e IRODS_ZONE_NAME=your_zone \
+  -e AUTH_SECRET=your_secret \ # if auth is enabled
   api-service api
 ```
 
@@ -53,6 +54,7 @@ docker run -it \
   -e IRODS_HOST=irods.ies.example.com \
   -e IRODS_USER_NAME=your_username \
   -e IRODS_ZONE_NAME=your_zone \
+  -e AUTH_SECRET=your_secret \ # if auth is enabled
   api-service api <your-config-file>.yml
 ```
 
@@ -76,3 +78,8 @@ Note: Because a session LOGIN with Keycloak triggers **2 events**, the API will 
 
 ## Swagger and ReDoc
 The API comes with [Swagger](https://swagger.io/) and [API documentation](https://swagger.io/blog/api-development/redoc-openapi-powered-documentation/) integrated. Once running, visit _http://<your_api_host>/swagger_ or _http://<your_api_host>/redoc_
+
+## Authentication
+API supports authentication for users stored in the configuration, which through an API-Key would generate a JWT Token with an expiration time.
+The authentication can be enabled/disabled through this API's config file. Simply adding or removing ```authConfig:``` section will enable/disable it.
+Additionally, when the authentication is enabled, it requires **AUTH_SECRET** environment variable, which should be a generated long hash.
