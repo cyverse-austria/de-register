@@ -1,6 +1,6 @@
 port: 7000
 irodsServiceConfig:
-  password: "ksasagrybisdRPY1M"
+  password: "test"
   zone: "TUG"
   ipcServices: false
 ldapServiceConfig:
