@@ -2,6 +2,7 @@ package com.cyverse.keycloak.irods.service;
 
 import com.cyverse.keycloak.http.ListenerHttpClient;
 
+import com.cyverse.keycloak.http.TokenService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class IrodsService {
     private static final Logger logger = Logger.getLogger(IrodsService.class);
     private final ListenerHttpClient httpClient;
+
     private static final String IRODS_ENDPOINT = "/api/users/irods";
 
     public IrodsService(ListenerHttpClient httpClient) {
