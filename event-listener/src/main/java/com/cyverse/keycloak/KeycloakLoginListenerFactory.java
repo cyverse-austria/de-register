@@ -1,5 +1,6 @@
 package com.cyverse.keycloak;
 import com.cyverse.keycloak.http.ListenerHttpClient;
+import com.cyverse.keycloak.http.TokenService;
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
 import org.keycloak.Config;
@@ -37,9 +38,15 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
 
     @Override
     public void init(Config.Scope config) {
+        String serviceMail = config.get("service-mail");
+        String servicePassword = config.get("service-password");
+        TokenService tokenService = new TokenService(serviceMail, servicePassword);
+
         String host = config.get("api-service-host");
-        ListenerHttpClient httpClient = new ListenerHttpClient(host);
+        String apiKey = config.get("api-key");
+        ListenerHttpClient httpClient = new ListenerHttpClient(host, apiKey, tokenService);
         testConnection(httpClient);
+
         irodsService = new IrodsService(httpClient);
         ldapService = new LdapService(httpClient);
     }

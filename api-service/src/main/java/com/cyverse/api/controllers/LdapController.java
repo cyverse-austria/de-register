@@ -20,14 +20,15 @@ public class LdapController {
     }
 
     @OpenApi(
-            summary = "Create a new LDAP user account",
-            operationId = "addLdapUser",
-            path = "/api/users/ldap",
-            methods = HttpMethod.POST,
-            requestBody = @OpenApiRequestBody(
-                    content = {@OpenApiContent(from = UserModel.class)}
-            ),
-            responses = {@OpenApiResponse(status = "201")}
+        summary = "Create a new LDAP user account",
+        operationId = "addLdapUser",
+        path = "/api/users/ldap",
+        methods = HttpMethod.POST,
+        security = @OpenApiSecurity(name = "Bearer"),
+        requestBody = @OpenApiRequestBody(
+                content = {@OpenApiContent(from = UserModel.class)}
+        ),
+        responses = {@OpenApiResponse(status = "201")}
     )
     public void addLdapUser(Context ctx)
             throws UserException, ResourceAlreadyExistsException,
@@ -39,14 +40,15 @@ public class LdapController {
     }
 
     @OpenApi(
-            summary = "Update an existing LDAP user account",
-            operationId = "updateLdapUser",
-            path = "/api/users/ldap",
-            methods = HttpMethod.PUT,
-            requestBody = @OpenApiRequestBody(
-                    content = {@OpenApiContent(from = UserModel.class)}
-            ),
-            responses = {@OpenApiResponse(status = "200")}
+        summary = "Update an existing LDAP user account",
+        operationId = "updateLdapUser",
+        path = "/api/users/ldap",
+        methods = HttpMethod.PUT,
+        security = @OpenApiSecurity(name = "Bearer"),
+        requestBody = @OpenApiRequestBody(
+                content = {@OpenApiContent(from = UserModel.class)}
+        ),
+        responses = {@OpenApiResponse(status = "200")}
     )
     public void updateLdapUser(Context ctx)
             throws UserException, ResourceAlreadyExistsException,
@@ -58,14 +60,15 @@ public class LdapController {
     }
 
     @OpenApi(
-            summary = "Adds an LDAP user to a specified LDAP group",
-            operationId = "addLdapUserToGroup",
-            path = "/api/groups/ldap",
-            methods = HttpMethod.PUT,
-            requestBody = @OpenApiRequestBody(
-                    content = {@OpenApiContent(from = UserModel.class)}
-            ),
-            responses = {@OpenApiResponse(status = "200")}
+        summary = "Adds an LDAP user to a specified LDAP group",
+        operationId = "addLdapUserToGroup",
+        path = "/api/groups/ldap",
+        methods = HttpMethod.PUT,
+        security = @OpenApiSecurity(name = "Bearer"),
+        requestBody = @OpenApiRequestBody(
+                content = {@OpenApiContent(from = UserModel.class)}
+        ),
+        responses = {@OpenApiResponse(status = "200")}
     )
     public void addLdapUserToGroup(Context ctx)
             throws UserException, ResourceAlreadyExistsException, NamingException {

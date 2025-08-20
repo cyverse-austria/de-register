@@ -14,7 +14,7 @@ fi
 echo "Start api-service"
 docker build --build-arg APP_VERSION=0.0.1 -t api-service ../api-service/
 docker run --rm -it \
- -e IRODS_HOST=qa-ies.cyverse.at -e IRODS_USER_NAME=portal -e IRODS_ZONE_NAME=TUG -p 7000:7000 -d api-service api
+ -e IRODS_HOST=qa-ies.cyverse.at -e IRODS_USER_NAME=portal -e IRODS_ZONE_NAME=TUG -e AUTH_SECRET=test_secret -p 7000:7000 -d api-service api
 
 docker compose down
 docker compose up -d --build

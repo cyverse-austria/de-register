@@ -1,6 +1,6 @@
 port: 7000
 irodsServiceConfig:
-  password: "test"
+  password: "ksasagrybisdRPY1M"
   zone: "TUG"
   ipcServices: false
 ldapServiceConfig:
@@ -10,3 +10,9 @@ ldapServiceConfig:
   baseDN: "dc=example,dc=org"
   everyoneGroup: "everyone"
   firstLoginPassword: "notreal"
+authConfig:
+  apiKey: "<api_key>"
+  users:
+    test_user:
+      mail: "test.user@example.com"
+      password: "testpass"

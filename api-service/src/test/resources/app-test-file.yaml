@@ -1,3 +1,4 @@
+port: 7000
 irodsServiceConfig:
   password: "test"
   zone: "TUG"
