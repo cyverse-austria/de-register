@@ -12,10 +12,13 @@ import java.util.Map;
 
 public class TokenService {
     private static final Logger logger = Logger.getLogger(TokenService.class);
+
     private String serviceMail;
     private String servicePassword;
+
     private static final String TOKEN_ENDPOINT = "/api/login";
-    private static final Long EXPIRATION_TIME_MS = 3600 * 1000L;
+    private static final String JWT = "jwt";
+    private static final String EXPIRES = "expires";
 
     private String currentToken;
     private Date currentExpirationTime;
@@ -57,8 +60,15 @@ public class TokenService {
                     logger.info("Got token successfully from API");
                 }
 
-                currentExpirationTime.setTime(now.getTime() + EXPIRATION_TIME_MS);
-                currentToken = response.body();
+                Map<?, ?> parsedResponse = mapper.readValue(response.body(), Map.class);
+                if (!(parsedResponse.containsKey(JWT)
+                        && parsedResponse.containsKey(EXPIRES))) {
+                    logger.error("Got malformed response from API: " + response.body());
+                    return currentToken;
+                }
+
+                currentToken = (String) parsedResponse.get(JWT);
+                currentExpirationTime.setTime(now.getTime() + (Integer) parsedResponse.get(EXPIRES));
             } catch (JsonProcessingException jsonExc) {
                 logger.error("Got exception trying to build token request");
             } catch (IOException | InterruptedException httpExc) {

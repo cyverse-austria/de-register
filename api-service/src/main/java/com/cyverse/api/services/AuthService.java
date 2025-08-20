@@ -24,7 +24,7 @@ public class AuthService {
     private Algorithm algorithm;
     private static final String AUTH_SECRET = "AUTH_SECRET";
 
-    public static final Long EXPIRES_IN_MS = 3600 * 1000L;
+    public static final long EXPIRES_IN_MS = 3600000L;
 
     public AuthService(Map<String, AuthUserConfig> users) {
         this.users = users;
