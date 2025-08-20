@@ -1,5 +1,4 @@
 port: 7000
-apiKey: "<api_key>"
 irodsServiceConfig:
   password: "test"
   ipcServices: false
@@ -9,7 +8,3 @@ ldapServiceConfig:
   password: "notreal"
   baseDN: "dc=example,dc=org"
   everyoneGroup: "everyone"
-users:
-  testuser:
-    mail: test.user@example.com
-    password: testpass

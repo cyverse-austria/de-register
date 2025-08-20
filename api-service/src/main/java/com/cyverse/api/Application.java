@@ -45,29 +45,10 @@ public class Application {
             System.exit(1);
         }
 
-        SecurityComponentConfiguration securityComponentApiKey = new SecurityComponentConfiguration()
-                .withSecurityScheme("ApiKeyAuth", new ApiKeyAuth());
-        SecurityComponentConfiguration securityComponentBearer = new SecurityComponentConfiguration()
-                .withSecurityScheme("Bearer", new BearerAuth());
-
         Javalin app = Javalin.create(
                 config -> {
-                    config.registerPlugin(
-                            new OpenApiPlugin(openApiConfig ->
-                                openApiConfig
-                                    .withDocumentationPath("/openapi.json")
-                                    .withDefinitionConfiguration(
-                                            (version, openApiDefinition) ->
-                                            openApiDefinition
-                                                    .withInfo(openApiInfo ->
-                                                            openApiInfo
-                                                                    .description(
-                                                                            "API for creating LDAP and iRODS user accounts," +
-                                                                                    " including account registration and management")
-                                                    )
-                                                    .withSecurity(securityComponentApiKey)
-                                                    .withSecurity(securityComponentBearer)
-                                    )));
+                    // swagger-openapi configuration
+                    config.registerPlugin(getNewOpenApiPlugin());
                     config.registerPlugin(new SwaggerPlugin(swaggerConfig ->
                             swaggerConfig.setDocumentationPath("/openapi.json")));
                     config.registerPlugin(new ReDocPlugin(redocConfig ->
@@ -96,27 +77,32 @@ public class Application {
         IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
         LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
         ldapService.init();
-        AuthService authService = new AuthService(appConfig.getUsers());
+
+        // authentication only if configured
+        if (appConfig.getAuthConfig() != null) {
+            AuthService authService = new AuthService(appConfig.getAuthConfig().getUsers());
+            authService.init();
+
+            AuthController authController = new AuthController(
+                    authService, appConfig.getAuthConfig().getApiKey());
+            app.post("/api/login", authController::login);
+
+            Handler authMiddleware = ctx -> {
+                String header = ctx.header(AUTHORIZATION);
+                if (header == null) {
+                    throw new UnauthorizedAccessException("Missing Authorization token");
+                }
+                authService.verifyToken(header
+                        .replace("Bearer", "")
+                        .strip());
+            };
+
+            // auth middleware
+            app.before("/api/users/*", authMiddleware);
+            app.before("/api/groups/*", authMiddleware);
+        }
 
         // controllers
-        AuthController authController = new AuthController(
-                authService, appConfig.getApiKey());
-        app.post("/api/login", authController::login);
-
-        Handler authMiddleware = ctx -> {
-            String header = ctx.header(AUTHORIZATION);
-            if (header == null) {
-                throw new UnauthorizedAccessException("Missing Authorization token");
-            }
-            authService.verifyToken(header
-                    .replace("Bearer", "")
-                    .strip());
-        };
-
-        // apply middleware
-        app.before("/api/users/*", authMiddleware);
-        app.before("/api/groups/*", authMiddleware);
-
         IrodsController irodsController = new IrodsController(irodsService);
         app.post("/api/users/irods", irodsController::addIrodsUser);
         app.put("/api/users/irods", irodsController::grantUserAccess);
@@ -130,5 +116,26 @@ public class Application {
     private static ApiServiceConfig loadConfig(String filePath) throws Exception {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         return mapper.readValue(new File(filePath), ApiServiceConfig.class);
+    }
+
+    private static OpenApiPlugin getNewOpenApiPlugin() {
+        SecurityComponentConfiguration securityComponentApiKey = new SecurityComponentConfiguration()
+                .withSecurityScheme("ApiKeyAuth", new ApiKeyAuth());
+        SecurityComponentConfiguration securityComponentBearer = new SecurityComponentConfiguration()
+                .withSecurityScheme("Bearer", new BearerAuth());
+
+        String description = "API for creating LDAP and iRODS user accounts, including account registration and management";
+
+        return new OpenApiPlugin(openApiConfig ->
+                openApiConfig
+                        .withDocumentationPath("/openapi.json")
+                        .withDefinitionConfiguration((version,
+                                 openApiDefinition) ->
+                                        openApiDefinition
+                                                .withInfo(openApiInfo ->
+                                                        openApiInfo
+                                                                .description(description))
+                                                .withSecurity(securityComponentApiKey)
+                                                .withSecurity(securityComponentBearer)));
     }
 }
