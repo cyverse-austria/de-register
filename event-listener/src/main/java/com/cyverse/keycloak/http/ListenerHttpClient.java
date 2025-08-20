@@ -9,14 +9,21 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+
 public class ListenerHttpClient {
 
     private String host;
+    private String apiKey;
+    private TokenService tokenService;
+
     private static final String HEALTH_ENDPOINT = "/";
 
-    // TODO Auth
-    public ListenerHttpClient(String host) {
+    public ListenerHttpClient(String host, String apiKey, TokenService tokenService) {
         this.host = host;
+        this.apiKey = apiKey;
+        this.tokenService = tokenService;
     }
 
     public HttpClient getHttpClient() {
@@ -27,12 +34,41 @@ public class ListenerHttpClient {
                 .build();
     }
 
+    public HttpRequest getRequestPOSTnoAuth(String endpoint, String body) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(host + endpoint))
+                .timeout(Duration.ofMinutes(1))
+                .header(CONTENT_TYPE, "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
+
     public HttpRequest getRequestPOST(String endpoint, String body) {
         return HttpRequest.newBuilder()
                 .uri(URI.create(host + endpoint))
                 .timeout(Duration.ofMinutes(1))
-                .header("Content-Type", "application/json")
+                .header(CONTENT_TYPE, "application/json")
+                .header(AUTHORIZATION, "Bearer " + tokenService.getToken(this))
                 .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
+
+    public HttpRequest getRequestPOSTApiKey(String endpoint, String body) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(host + endpoint))
+                .timeout(Duration.ofMinutes(1))
+                .header(CONTENT_TYPE, "application/json")
+                .header("X-API-KEY", apiKey)
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+    }
+
+    public HttpRequest getRequestPUTnoAuth(String endpoint, String body) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(host + endpoint))
+                .timeout(Duration.ofMinutes(1))
+                .header(CONTENT_TYPE, "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(body))
                 .build();
     }
 
@@ -40,7 +76,8 @@ public class ListenerHttpClient {
         return HttpRequest.newBuilder()
                 .uri(URI.create(host + endpoint))
                 .timeout(Duration.ofMinutes(1))
-                .header("Content-Type", "application/json")
+                .header(CONTENT_TYPE, "application/json")
+                .header(AUTHORIZATION, "Bearer " +  tokenService.getToken(this))
                 .PUT(HttpRequest.BodyPublishers.ofString(body))
                 .build();
     }
@@ -49,7 +86,7 @@ public class ListenerHttpClient {
         return HttpRequest.newBuilder()
                 .uri(URI.create(host + HEALTH_ENDPOINT))
                 .timeout(Duration.ofMinutes(1))
-                .header("Content-Type", "application/json")
+                .header(CONTENT_TYPE, "application/json")
                 .GET()
                 .build();
     }
