@@ -6,10 +6,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.cyverse.api.config.AuthUserConfig;
-import com.cyverse.api.exceptions.UnauthorizedAccessException;
 import com.cyverse.api.exceptions.ApiTokenExpiredException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.cyverse.api.exceptions.UnauthorizedAccessException;
 
 import java.util.Date;
 import java.util.List;
@@ -20,15 +18,27 @@ import java.util.Objects;
  * Authentication service based on JWTs.
  */
 public class AuthService {
-    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
     private final Map<String, AuthUserConfig> users;
     private static final String TOKEN_ISSUER = "http://api-service.cyverse.at";
+    private Algorithm algorithm;
+    private static final String AUTH_SECRET = "AUTH_SECRET";
+
     public static final Long EXPIRES_IN_MS = 3600 * 1000L;
 
     public AuthService(Map<String, AuthUserConfig> users) {
         this.users = users;
     }
 
+    public void init() {
+        String secret = System.getenv(AUTH_SECRET);
+        algorithm = Algorithm.HMAC256(secret);
+    }
+
+    /**
+     * Generate a new JWT token with a default expiration time, based on
+     * the known user that tries to log in.
+     */
     public String generateToken(String mail, String password)
             throws UnauthorizedAccessException {
         List<Map.Entry<String, AuthUserConfig>> matchUsers = users.entrySet().stream()
@@ -39,7 +49,6 @@ public class AuthService {
             throw new UnauthorizedAccessException("User not found");
         }
 
-        Algorithm algorithm = Algorithm.HMAC256("mysecret");
         Date now = new Date();
         Date expires = new Date(now.getTime() + EXPIRES_IN_MS);
         return JWT.create()
@@ -50,6 +59,9 @@ public class AuthService {
                 .sign(algorithm);
     }
 
+    /**
+     * Basit JWT Token check by sub and issuer.
+     */
     public void verifyToken(String token)
             throws UnauthorizedAccessException, JWTVerificationException,
             ApiTokenExpiredException {
@@ -57,7 +69,6 @@ public class AuthService {
             throw new UnauthorizedAccessException("Missing JWT token");
         }
 
-        Algorithm algorithm = Algorithm.HMAC256("mysecret");
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT decodedJWT = verifier.verify(token);
 
