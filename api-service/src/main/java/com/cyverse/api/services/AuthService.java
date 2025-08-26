@@ -18,15 +18,15 @@ import java.util.Objects;
  * Authentication service based on JWTs.
  */
 public class AuthService {
-
     private final Map<String, AuthUserConfig> users;
-    private static final String TOKEN_ISSUER = "http://api-service.cyverse.at";
+    private final String tokenIssuer;
     private Algorithm algorithm;
     private static final String AUTH_SECRET = "AUTH_SECRET";
 
     public static final long EXPIRES_IN_MS = 3600000L;
 
-    public AuthService(Map<String, AuthUserConfig> users) {
+    public AuthService(String tokenIssuer, Map<String, AuthUserConfig> users) {
+        this.tokenIssuer = tokenIssuer;
         this.users = users;
     }
 
@@ -52,7 +52,7 @@ public class AuthService {
         Date now = new Date();
         Date expires = new Date(now.getTime() + EXPIRES_IN_MS);
         return JWT.create()
-                .withIssuer(TOKEN_ISSUER)
+                .withIssuer(tokenIssuer)
                 .withSubject(matchUsers.get(0).getKey()) // username
                 .withIssuedAt(now)
                 .withExpiresAt(expires)
@@ -73,7 +73,7 @@ public class AuthService {
         DecodedJWT decodedJWT = verifier.verify(token);
 
         if (!(users.containsKey(decodedJWT.getSubject())
-                && Objects.equals(decodedJWT.getIssuer(), TOKEN_ISSUER))) {
+                && Objects.equals(decodedJWT.getIssuer(), tokenIssuer))) {
             throw new UnauthorizedAccessException("Unknown sub/issuer");
         }
 

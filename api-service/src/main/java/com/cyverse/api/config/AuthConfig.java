@@ -8,12 +8,16 @@ import java.util.Map;
 @Data
 public class AuthConfig implements GenericConfig {
     private String apiKey;
+    private String tokenIssuer;
     private Map<String, AuthUserConfig> users;
 
     @Override
     public void verifyFieldsAreSet() throws ConfigException {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new ConfigException("Missing api key from auth config");
+        }
+        if (tokenIssuer == null || tokenIssuer.isEmpty()) {
+            throw new ConfigException("Missing token issuer from auth config");
         }
         if (users == null || users.isEmpty()) {
             throw new ConfigException("Missing users configuration from auth config");

@@ -12,6 +12,7 @@ ldapServiceConfig:
   firstLoginPassword: "notreal"
 authConfig:
   apiKey: "<api_key>"
+  tokenIssuer: "http://api-service.cyverse.at"
   users:
     test_user:
       mail: "test.user@example.com"
