@@ -83,3 +83,5 @@ The API comes with [Swagger](https://swagger.io/) and [API documentation](https:
 API supports authentication for users stored in the configuration, which through an API-Key would generate a JWT Token with an expiration time.
 The authentication can be enabled/disabled through this API's config file. Simply adding or removing ```authConfig:``` section will enable/disable it.
 Additionally, when the authentication is enabled, it requires **AUTH_SECRET** environment variable, which should be a generated long hash.
+
+**Example**: Generate a hash secret using: ```openssl rand -base64 32```.
