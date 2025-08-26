@@ -80,7 +80,9 @@ public class Application {
 
         // authentication only if configured
         if (appConfig.getAuthConfig() != null) {
-            AuthService authService = new AuthService(appConfig.getAuthConfig().getUsers());
+            AuthService authService = new AuthService(
+                    appConfig.getAuthConfig().getTokenIssuer(),
+                    appConfig.getAuthConfig().getUsers());
             authService.init();
 
             AuthController authController = new AuthController(
