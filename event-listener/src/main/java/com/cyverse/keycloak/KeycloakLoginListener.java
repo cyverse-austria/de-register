@@ -2,6 +2,7 @@ package com.cyverse.keycloak;
 
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.portal.service.UserPortalService;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -21,11 +22,16 @@ public class KeycloakLoginListener implements EventListenerProvider {
     private final KeycloakSession session;
     private final LdapService ldapService;
     private final IrodsService irodsService;
+    private final UserPortalService userPortalService;
 
-    public KeycloakLoginListener(KeycloakSession session, LdapService ldapService, IrodsService irodsService) {
+    public KeycloakLoginListener(KeycloakSession session,
+                                 LdapService ldapService,
+                                 IrodsService irodsService,
+                                 UserPortalService userPortalService) {
         this.session = session;
         this.ldapService = ldapService;
         this.irodsService = irodsService;
+        this.userPortalService = userPortalService;
     }
 
     private void performLdapActions(UserModel user) {
@@ -44,10 +50,16 @@ public class KeycloakLoginListener implements EventListenerProvider {
         irodsService.grantIrodsUserAccess(user);
     }
 
+    private void performUserPortalActions(UserModel user) {
+        if (userPortalService != null) {
+            userPortalService.addUserToPortal(user);
+        }
+    }
+
     /**
      * Perform actions based on keycloak events.
      * Actions supported in this implementation: LDAP User update, iRODS account
-     * creation.
+     * creation, User Portal DB user creation.
      *
      * @param event Event that triggers the actions
      */
@@ -64,6 +76,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
         if (user != null && !sessionRealm.getName().contains("master")) {
             performLdapActions(user);
             performIrodsActions(user);
+            performUserPortalActions(user);
         }
     }
 
