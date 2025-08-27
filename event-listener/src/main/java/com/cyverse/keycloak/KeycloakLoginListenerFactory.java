@@ -3,6 +3,7 @@ import com.cyverse.keycloak.http.ListenerHttpClient;
 import com.cyverse.keycloak.http.TokenService;
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.portal.service.UserPortalService;
 import org.keycloak.Config;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -16,10 +17,11 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
 
     private LdapService ldapService;
     private IrodsService irodsService;
+    private UserPortalService userPortalService;
 
     @Override
     public EventListenerProvider create(KeycloakSession session) {
-        return new KeycloakLoginListener(session, ldapService, irodsService);
+        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService);
     }
 
     private void testConnection(ListenerHttpClient httpClient) {
@@ -49,6 +51,20 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
 
         irodsService = new IrodsService(httpClient);
         ldapService = new LdapService(httpClient);
+
+        String portalHost = config.get("user-portal-host");
+        String hmacKey = config.get("hmac-key");
+        String portalDivisor = config.get("portal-divisor");
+
+        if (portalHost == null || hmacKey == null || portalDivisor == null) {
+            // skip
+            return;
+        }
+
+        ListenerHttpClient portalClient = new ListenerHttpClient(portalHost, null, null);
+        userPortalService = new UserPortalService(portalClient,
+                hmacKey,
+                Integer.valueOf(portalDivisor));
     }
 
     @Override
