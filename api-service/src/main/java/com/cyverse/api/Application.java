@@ -8,6 +8,7 @@ import com.cyverse.api.services.AuthService;
 import com.cyverse.api.services.IrodsService;
 import com.cyverse.api.services.LdapService;
 import com.cyverse.api.services.UserPortalService;
+import com.cyverse.api.services.PasswordService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.javalin.Javalin;
@@ -67,8 +68,12 @@ public class Application {
         app.get("/", healthController::getHealthy);
 
         // services
-        IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
-        LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
+        PasswordService passwordService = new PasswordService();
+
+        IrodsService irodsService = new IrodsService(
+                appConfig.getIrodsServiceConfig(), passwordService);
+        LdapService ldapService = new LdapService(
+                appConfig.getLdapServiceConfig(), passwordService);
         ldapService.init();
         UserPortalService userPortalService = new UserPortalService(appConfig.getUserPortalServiceConfig());
         userPortalService.init();
