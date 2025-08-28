@@ -21,6 +21,9 @@ public class IrodsServiceTest {
     @Mock
     private IrodsServiceConfig config;
 
+    @Mock
+    private PasswordService passwordService;
+
     @Spy
     @InjectMocks
     IrodsService irodsService;

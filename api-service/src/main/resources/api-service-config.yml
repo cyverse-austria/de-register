@@ -9,7 +9,6 @@ ldapServiceConfig:
   password: "notreal"
   baseDN: "dc=example,dc=org"
   everyoneGroup: "everyone"
-  firstLoginPassword: "notreal"
 authConfig:
   apiKey: "<api_key>"
   tokenIssuer: "http://api-service.cyverse.at"

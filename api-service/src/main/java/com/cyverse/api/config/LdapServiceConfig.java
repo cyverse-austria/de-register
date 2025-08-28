@@ -14,7 +14,6 @@ public class LdapServiceConfig implements GenericConfig {
     private String password;
     private String baseDN;
     private String everyoneGroup;
-    private String firstLoginPassword;
 
     @Override
     public void verifyFieldsAreSet() throws ConfigException {
@@ -25,8 +24,7 @@ public class LdapServiceConfig implements GenericConfig {
                 || admin == null || admin.isEmpty()
                 || password == null || password.isEmpty()
                 || baseDN == null || baseDN.isEmpty()
-                || everyoneGroup == null || everyoneGroup.isEmpty()
-                || firstLoginPassword == null || firstLoginPassword.isEmpty()) {
+                || everyoneGroup == null || everyoneGroup.isEmpty()) {
             throw new ConfigException("Field missing from LDAP Service config file." +
                     "Needed attributes: " + attrs);
         }
