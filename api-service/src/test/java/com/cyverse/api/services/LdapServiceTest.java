@@ -24,6 +24,9 @@ public class LdapServiceTest {
     @Mock
     private LdapServiceConfig config;
 
+    @Mock
+    private PasswordService passwordService;
+
     @Spy
     @InjectMocks
     LdapService ldapService;
@@ -43,7 +46,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(config).getFirstLoginPassword();
+        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
@@ -67,7 +70,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(config).getFirstLoginPassword();
+        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
@@ -92,7 +95,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(config).getFirstLoginPassword();
+        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
@@ -120,7 +123,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(config).getFirstLoginPassword();
+        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
