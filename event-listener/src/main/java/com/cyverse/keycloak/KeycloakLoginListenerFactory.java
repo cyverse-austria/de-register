@@ -2,8 +2,16 @@ package com.cyverse.keycloak;
 import com.cyverse.keycloak.http.ListenerHttpClient;
 import com.cyverse.keycloak.http.TokenService;
 import com.cyverse.keycloak.irods.service.IrodsService;
+import com.cyverse.keycloak.irods.service.IrodsServiceImpl;
+import com.cyverse.keycloak.irods.service.NoOpIrodsServiceImpl;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.portal.service.NoOpUserPortalServiceImpl;
 import com.cyverse.keycloak.portal.service.UserPortalService;
+import com.cyverse.keycloak.portal.service.UserPortalServiceImpl;
+import com.cyverse.keycloak.ldap.service.LdapServiceImpl;
+import com.cyverse.keycloak.ldap.service.NoOpLdapServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
@@ -13,7 +21,9 @@ import org.keycloak.models.KeycloakSessionFactory;
 /**
  * Factory for Keycloak event-listener.
  */
+@Slf4j
 public class KeycloakLoginListenerFactory implements EventListenerProviderFactory {
+    private static final Logger logger = Logger.getLogger(KeycloakLoginListenerFactory.class);
 
     private LdapService ldapService;
     private IrodsService irodsService;
@@ -24,18 +34,20 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
         return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService);
     }
 
-    private void testConnection(ListenerHttpClient httpClient) {
+    private boolean testConnection(ListenerHttpClient httpClient) {
         int retries = 5;
         while (retries-- != 0) {
             try {
                 if (httpClient.testConnection()) {
-                    break;
+                    return true;
                 }
                 Thread.sleep(1000);
             } catch (Exception e) {
-                throw new RuntimeException("HTTP Client not responding.");
+                logger.error("HTTP Client not responding. For this event listener will use no-op services.");
+                return false;
             }
         }
+        return false;
     }
 
     @Override
@@ -47,11 +59,17 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
         String host = config.get("api-service-host");
         String apiKey = config.get("api-key");
         ListenerHttpClient httpClient = new ListenerHttpClient(host, apiKey, tokenService);
-        testConnection(httpClient);
+        boolean connected = testConnection(httpClient);
 
-        irodsService = new IrodsService(httpClient);
-        ldapService = new LdapService(httpClient);
-        userPortalService = new UserPortalService(httpClient);
+        if (connected) {
+            irodsService = new IrodsServiceImpl(httpClient);
+            ldapService = new LdapServiceImpl(httpClient);
+            userPortalService = new UserPortalServiceImpl(httpClient);
+        } else {
+            irodsService = new NoOpIrodsServiceImpl();
+            ldapService = new NoOpLdapServiceImpl();
+            userPortalService = new NoOpUserPortalServiceImpl();
+        }
     }
 
     @Override
