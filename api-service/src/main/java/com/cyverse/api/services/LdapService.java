@@ -25,10 +25,12 @@ public class LdapService {
     private static final Logger logger = LoggerFactory.getLogger(LdapService.class);
     private final LdapServiceConfig ldapConfig;
     private final Hashtable<String, String> env;
+    private final PasswordService passwordService;
 
-    public LdapService(LdapServiceConfig config) {
+    public LdapService(LdapServiceConfig config, PasswordService passwordService) {
         this.ldapConfig = config;
         this.env = new Hashtable<>();
+        this.passwordService = passwordService;
     }
 
     /**
@@ -244,7 +246,8 @@ public class LdapService {
         attrs.put("gidNumber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
-        attrs.put("userPassword", generateSSHAHash(ldapConfig.getFirstLoginPassword()));
+        attrs.put("userPassword", generateSSHAHash(
+                passwordService.getGeneratedPassword(user.getUsername())));
 
         // TODO Just for testing now. Decide if needed
         attrs.put("title", "University/College Staff");

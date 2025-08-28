@@ -19,9 +19,11 @@ import java.util.List;
 public class IrodsService {
     private static final Logger logger = LoggerFactory.getLogger(IrodsService.class);
     private IrodsServiceConfig irodsConfig;
+    private PasswordService passwordService;
 
-    public IrodsService(IrodsServiceConfig irodsConfig) {
+    public IrodsService(IrodsServiceConfig irodsConfig, PasswordService passwordService) {
         this.irodsConfig = irodsConfig;
+        this.passwordService = passwordService;
     }
 
     /**
@@ -49,6 +51,8 @@ public class IrodsService {
                                 + username
                                 + " rodsuser");
         runProcess(addUsercommand);
+        runProcess(buildChangePasswordCommand(username,
+                passwordService.getGeneratedPassword(username)));
     }
 
     /**
@@ -161,6 +165,16 @@ public class IrodsService {
                 "echo "
                         + irodsConfig.getPassword()
                         + " | iinit; ils -A ../" + username
+        );
+    }
+
+    private List<String> buildChangePasswordCommand(String username, String password) {
+        return Arrays.asList(
+                "bash", "-c",
+                "echo "
+                        + irodsConfig.getPassword()
+                        + " | iinit; moduser " + username
+                        + " password -- " + password
         );
     }
 }
