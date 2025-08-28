@@ -110,7 +110,7 @@ public class IrodsService {
         String errorLine = "";
         List<String> outputLines = new ArrayList<>();
         while ((line = reader.readLine()) != null) {
-            if (line.contains("ERROR")) {
+            if (line.contains("ERROR") || line.contains("CAT_INVALID_AUTHENTICATION")) {
                 errorLine = line;
             }
             outputLines.add(line);
