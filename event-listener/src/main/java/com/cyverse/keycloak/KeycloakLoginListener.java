@@ -2,6 +2,7 @@ package com.cyverse.keycloak;
 
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.ldap.service.LdapServiceImpl;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
