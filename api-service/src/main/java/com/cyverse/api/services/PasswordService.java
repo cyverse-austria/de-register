@@ -16,13 +16,7 @@ public class PasswordService {
      */
     public String getGeneratedPassword(String username) {
         if (currentUsers.containsKey(username)) {
-            // we only have 2 services for now that depend on this password (ldap, irods)
-            // if both password are set, no need to keep it in memory
-            // in this case - both are set means this method was called 2 times for the
-            // same username
-            String passwd = currentUsers.get(username);
-            currentUsers.remove(username);
-            return passwd;
+            return currentUsers.get(username);
         }
 
         String randomSection = new Random().ints(
