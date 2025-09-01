@@ -51,9 +51,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
     }
 
     private void performUserPortalActions(UserModel user) {
-        if (userPortalService != null) {
-            userPortalService.addUserToPortal(user);
-        }
+        userPortalService.addUserToPortal(user);
     }
 
     /**

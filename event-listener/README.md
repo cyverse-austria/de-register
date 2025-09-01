@@ -1,6 +1,6 @@
 # event-listener
 Keycloak Event-Listener custom implementation that acts as a REST API Client and sends requests to an external service for
-creation of LDAP and iRODS accounts based on information received from the user that authenticates through Keycloak.
+creation of LDAP, iRODS and User Portal accounts based on information received from the user that authenticates through Keycloak.
 
 ## Configure inside Keycloak
 Select the target _realm_, go to _Realm settings_ -> _Events_, search and add **login-listener**.
@@ -23,19 +23,6 @@ KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_SERVICE_MAIL: test.user@example.com
 KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_SERVICE_PASSWORD: testpass
 ```
 API service should have a user configured for event-listener, then the user credentials should be the same as here.
-
-
-### Portal user creation
-Event-listener plugin will automatically try and create the user that logs in through Keycloak in the User Portal DB. This happens if the following
-configs are set in the Keycloak instance:
-```
-KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_USER_PORTAL_HOST: http://192.168.31.115:3000
-KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_HMAC_KEY: <ADD SECRET HERE>
-KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_PORTAL_DIVISOR: 7
-```
-These values should be the same as their respective counterparts in the actual running Portal service.
-The plugin will still work even when not providing these values, just that user creation in portal DB will be skipped.
-
 
 ## Local testing
 Testing should be done by using register-test module to start all necessary services.

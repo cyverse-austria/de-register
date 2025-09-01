@@ -1,30 +1,23 @@
 package com.cyverse.api;
 
 import com.cyverse.api.config.ApiServiceConfig;
-import com.cyverse.api.config.IrodsServiceConfig;
-import com.cyverse.api.config.LdapServiceConfig;
-import com.cyverse.api.controllers.AuthController;
-import com.cyverse.api.controllers.HealthController;
-import com.cyverse.api.controllers.IrodsController;
-import com.cyverse.api.controllers.LdapController;
+import com.cyverse.api.controllers.*;
 import com.cyverse.api.exceptions.ExceptionHandler;
 import com.cyverse.api.exceptions.UnauthorizedAccessException;
 import com.cyverse.api.services.AuthService;
 import com.cyverse.api.services.IrodsService;
 import com.cyverse.api.services.LdapService;
+import com.cyverse.api.services.UserPortalService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.javalin.Javalin;
 import io.javalin.http.Handler;
 import io.javalin.openapi.ApiKeyAuth;
 import io.javalin.openapi.BearerAuth;
-import io.javalin.openapi.OpenApiSecurity;
-import io.javalin.openapi.SecurityScheme;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.SecurityComponentConfiguration;
 import io.javalin.openapi.plugin.redoc.ReDocPlugin;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
-import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +70,8 @@ public class Application {
         IrodsService irodsService = new IrodsService(appConfig.getIrodsServiceConfig());
         LdapService ldapService = new LdapService(appConfig.getLdapServiceConfig());
         ldapService.init();
+        UserPortalService userPortalService = new UserPortalService(appConfig.getUserPortalServiceConfig());
+        userPortalService.init();
 
         // authentication only if configured
         if (appConfig.getAuthConfig() != null) {
@@ -113,6 +108,9 @@ public class Application {
         app.post("/api/users/ldap", ldapController::addLdapUser);
         app.put("/api/users/ldap", ldapController::updateLdapUser);
         app.put("/api/groups/ldap", ldapController::addLdapUserToGroup);
+
+        UserPortalController userPortalController = new UserPortalController(userPortalService);
+        app.post("/api/users/portal", userPortalController::addUserPortalUser);
     }
 
     private static ApiServiceConfig loadConfig(String filePath) throws Exception {

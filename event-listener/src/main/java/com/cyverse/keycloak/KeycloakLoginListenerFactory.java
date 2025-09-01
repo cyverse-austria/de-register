@@ -51,20 +51,7 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
 
         irodsService = new IrodsService(httpClient);
         ldapService = new LdapService(httpClient);
-
-        String portalHost = config.get("user-portal-host");
-        String hmacKey = config.get("hmac-key");
-        String portalDivisor = config.get("portal-divisor");
-
-        if (portalHost == null || hmacKey == null || portalDivisor == null) {
-            // skip
-            return;
-        }
-
-        ListenerHttpClient portalClient = new ListenerHttpClient(portalHost, null, null);
-        userPortalService = new UserPortalService(portalClient,
-                hmacKey,
-                Integer.valueOf(portalDivisor));
+        userPortalService = new UserPortalService(httpClient);
     }
 
     @Override
