@@ -9,6 +9,7 @@ public class ApiServiceConfig implements GenericConfig {
     private IrodsServiceConfig irodsServiceConfig;
     private LdapServiceConfig ldapServiceConfig;
     private AuthConfig authConfig;
+    private UserPortalServiceConfig userPortalServiceConfig;
 
     private static Integer DEFAULT_PORT = 7000;
 
@@ -24,10 +25,14 @@ public class ApiServiceConfig implements GenericConfig {
         if (ldapServiceConfig == null) {
             throw new ConfigException(String.format(missing, "ldapServiceConfig"));
         }
+        if (userPortalServiceConfig == null) {
+            throw new ConfigException(String.format(missing, "userPortalServiceConfig"));
+        }
         if (authConfig != null) {
             authConfig.verifyFieldsAreSet();
         }
         irodsServiceConfig.verifyFieldsAreSet();
         ldapServiceConfig.verifyFieldsAreSet();
+        userPortalServiceConfig.verifyFieldsAreSet();
     }
 }

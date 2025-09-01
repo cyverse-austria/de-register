@@ -10,9 +10,6 @@ import io.javalin.http.HttpStatus;
 import io.javalin.openapi.*;
 
 import java.io.IOException;
-import java.util.Map;
-
-import static io.javalin.http.Header.AUTHORIZATION;
 
 public class IrodsController {
 

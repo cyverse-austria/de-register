@@ -1,6 +1,6 @@
 # REST API Service for LDAP and iRODS registration
 
-This repository provides a REST API that can register a User to an LDAP server or iRODS.
+This repository provides a REST API that can register a User to an LDAP server, iRODS DB or CyVerse User Portal DB.
 Also provides a Docker image to run the iRODS (Integrated Rule-Oriented Data System) command line client (iCommands) version **4.3.1** on Ubuntu 22.04.  
 It allows you to connect to an iRODS server from outside your local environment using environment variables to configure your connection.
 

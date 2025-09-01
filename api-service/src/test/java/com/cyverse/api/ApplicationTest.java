@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Objects;
 
 public class ApplicationTest {
