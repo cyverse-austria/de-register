@@ -44,4 +44,13 @@ public class ApiHttpClient {
                 .PUT(HttpRequest.BodyPublishers.ofString(body))
                 .build();
     }
+
+    public HttpRequest getRequestGETnoAuth(String endpoint) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(host + endpoint))
+                .timeout(Duration.ofMinutes(1))
+                .header(CONTENT_TYPE, "application/json")
+                .GET()
+                .build();
+    }
 }

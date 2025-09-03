@@ -1,6 +1,7 @@
 package com.cyverse.api.controllers;
 
 import com.cyverse.api.exceptions.UserException;
+import com.cyverse.api.exceptions.UserPortalException;
 import com.cyverse.api.models.UserModel;
 import com.cyverse.api.services.UserPortalService;
 import io.javalin.http.Context;
@@ -26,7 +27,7 @@ public class UserPortalController {
         ),
         responses = {@OpenApiResponse(status = "201")}
     )
-    public void addUserPortalUser(Context ctx) throws UserException {
+    public void addUserPortalUser(Context ctx) throws UserException, UserPortalException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         validateUser(user);
         userPortalService.addUserToPortal(user);
@@ -36,8 +37,9 @@ public class UserPortalController {
     private void validateUser(UserModel user) throws UserException {
         user.validateUsername();
         if (user.getFirstName() == null || user.getFirstName().isEmpty()
-                || user.getLastName() == null || user.getLastName().isEmpty()) {
-            throw new UserException("Username, first name and last name required for creating portal account");
+                || user.getLastName() == null || user.getLastName().isEmpty()
+                || user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new UserException("Username, first, last name and email required for creating portal account");
         }
     }
 }
