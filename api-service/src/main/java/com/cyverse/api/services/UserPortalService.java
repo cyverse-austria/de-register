@@ -33,6 +33,7 @@ public class UserPortalService {
     private static final String PORTAL_USERS_ENDPOINT = "/api/users";
     private static final String PORTAL_USERS_EXISTS_ENDPOINT = "/api/exists";
     private static final String PORTAL_PROPERTIES_ENDPOINT = "/api/users/properties";
+    private static final String INSTITUTIONS_EXTRA = "/institutions?keyword=other";
     private static final String USERNAME_FIELD = "username";
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final String PORTAL_STATUS_LOG = "PORTAL-API RESPONSE STATUS CODE: {}";
@@ -176,7 +177,9 @@ public class UserPortalService {
         HttpResponse<String> response =
                 httpClient.getHttpClient()
                         .send(httpClient
-                                        .getRequestGETnoAuth(PORTAL_PROPERTIES_ENDPOINT + "/institutions?keyword=other"),
+                                        .getRequestGETnoAuth(
+                                                PORTAL_PROPERTIES_ENDPOINT
+                                                        + INSTITUTIONS_EXTRA),
                                 HttpResponse.BodyHandlers.ofString());
 
         logger.debug(PORTAL_STATUS_LOG, response.statusCode());
