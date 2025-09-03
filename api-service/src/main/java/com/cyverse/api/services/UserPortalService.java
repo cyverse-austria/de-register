@@ -1,6 +1,7 @@
 package com.cyverse.api.services;
 
 import com.cyverse.api.config.UserPortalServiceConfig;
+import com.cyverse.api.exceptions.UserPortalException;
 import com.cyverse.api.models.UserModel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,15 +28,18 @@ public class UserPortalService {
     private static final Logger logger = LoggerFactory.getLogger(UserPortalService.class);
     private final UserPortalServiceConfig config;
     private ApiHttpClient httpClient;
+    private final Map<String, Integer> defaultProperties;
 
     private static final String PORTAL_USERS_ENDPOINT = "/api/users";
     private static final String PORTAL_USERS_EXISTS_ENDPOINT = "/api/exists";
-    private static final Integer DEFAULT_USER_INFO_ID = 1;
+    private static final String PORTAL_PROPERTIES_ENDPOINT = "/api/users/properties";
     private static final String USERNAME_FIELD = "username";
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
+    private static final String PORTAL_STATUS_LOG = "PORTAL-API RESPONSE STATUS CODE: {}";
 
     public UserPortalService(UserPortalServiceConfig config) {
         this.config = config;
+        this.defaultProperties = new HashMap<>();
     }
 
     public void init() {
@@ -47,16 +52,17 @@ public class UserPortalService {
      *
      * @param user the UserModel that comes from Keycloak data-model
      */
-    public void addUserToPortal(UserModel user) {
+    public void addUserToPortal(UserModel user) throws UserPortalException {
         if (userExists(user.getUsername())) {
             logger.debug("User already exists, exiting ...");
             return;
         }
 
+        setDefaultIDs();
+
         logger.debug("Try adding user to User Portal: {}", user.getUsername());
 
         ObjectMapper mapper = new ObjectMapper();
-
         Map<String, Object> data = buildUserPortalData(user);
         if (data == null) {
             return;
@@ -71,7 +77,7 @@ public class UserPortalService {
                                             .getRequestPUTnoAuth(PORTAL_USERS_ENDPOINT, jsonBody),
                                     HttpResponse.BodyHandlers.ofString());
 
-            logger.debug("PORTAL-API RESPONSE STATUS CODE: {}", response.statusCode());
+            logger.debug(PORTAL_STATUS_LOG, response.statusCode());
 
             if (response.statusCode() == HttpStatus.SC_OK) {
                 logger.info("Successfully added user {} in User Portal", user.getUsername());
@@ -103,7 +109,7 @@ public class UserPortalService {
                                             .getRequestPOSTnoAuth(PORTAL_USERS_EXISTS_ENDPOINT, jsonBody),
                                     HttpResponse.BodyHandlers.ofString());
 
-            logger.debug("PORTAL-API RESPONSE STATUS CODE: {}", response.statusCode());
+            logger.debug(PORTAL_STATUS_LOG, response.statusCode());
 
             Map<?, ?> parsedResponse = mapper.readValue(response.body(), Map.class);
             if (!(parsedResponse.containsKey(USERNAME_FIELD))) {
@@ -126,6 +132,60 @@ public class UserPortalService {
         return false;
     }
 
+    private void setDefaultIDs() throws UserPortalException {
+        try {
+            logger.debug("Getting user properties from portal API");
+
+            HttpResponse<String> response =
+                    httpClient.getHttpClient()
+                            .send(httpClient
+                                            .getRequestGETnoAuth(PORTAL_PROPERTIES_ENDPOINT),
+                                    HttpResponse.BodyHandlers.ofString());
+
+            logger.debug(PORTAL_STATUS_LOG, response.statusCode());
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, List<Map<?, ?>>> parsedResponse = mapper.readValue(response.body(), Map.class);
+
+            for (String property : parsedResponse.keySet()) {
+                // default value: first id value from list
+                Map<?, ?> firstProperty = parsedResponse.get(property).get(0);
+                defaultProperties.put(
+                        getSingularPropertyIdFieldName(property),
+                        (Integer) firstProperty.get("id")
+                );
+            }
+
+            setDefaultInstitutionID();
+        } catch (Exception e) {
+            throw new UserPortalException("Could not set user default properties.\n" + e.getMessage());
+        }
+    }
+
+    protected String getSingularPropertyIdFieldName(String property) {
+        String singularName = property.substring(0, property.length()-1);
+        if (singularName.endsWith("ie")) {
+            singularName = singularName.substring(0, singularName.length()-2) + "y";
+        }
+        return singularName + "_id";
+    }
+
+    private void setDefaultInstitutionID() throws IOException, InterruptedException {
+        logger.debug("Getting default institution from portal API");
+
+        HttpResponse<String> response =
+                httpClient.getHttpClient()
+                        .send(httpClient
+                                        .getRequestGETnoAuth(PORTAL_PROPERTIES_ENDPOINT + "/institutions?keyword=other"),
+                                HttpResponse.BodyHandlers.ofString());
+
+        logger.debug(PORTAL_STATUS_LOG, response.statusCode());
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<?,?>> parsedResponse = mapper.readValue(response.body(), List.class);
+        defaultProperties.put("grid_institution_id", (Integer)parsedResponse.get(0).get("id"));
+    }
+
     private Map<String, Object> buildUserPortalData(UserModel user) {
         Map<String, Object> data = new HashMap<>();
 
@@ -133,16 +193,8 @@ public class UserPortalService {
         data.put(String.valueOf(config.getDivisor() + 1), user.getFirstName());
         data.put(String.valueOf(config.getDivisor() + 2), user.getLastName());
         data.put("email", user.getEmail());
-        data.put("grid_institution_id", DEFAULT_USER_INFO_ID);
         data.put("department", "Other");
-        data.put("occupation_id", DEFAULT_USER_INFO_ID.toString());
-        data.put("research_area_id", DEFAULT_USER_INFO_ID.toString());
-        data.put("funding_agency_id", DEFAULT_USER_INFO_ID.toString());
-        data.put("country_id", DEFAULT_USER_INFO_ID);
-        data.put("region_id", DEFAULT_USER_INFO_ID.toString());
-        data.put("gender_id", DEFAULT_USER_INFO_ID.toString());
-        data.put("ethnicity_id", DEFAULT_USER_INFO_ID.toString());
-        data.put("aware_channel_id", DEFAULT_USER_INFO_ID.toString());
+        data.putAll(defaultProperties);
 
         Date now = new Date();
 
