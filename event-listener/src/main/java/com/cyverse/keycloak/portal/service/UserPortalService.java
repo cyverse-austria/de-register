@@ -44,7 +44,8 @@ public class UserPortalService {
         Map<String, Object> data = Map.of(
                 "username", user.getUsername(),
                 "firstName", user.getFirstName(),
-                "lastName", user.getLastName()
+                "lastName", user.getLastName(),
+                "email", user.getEmail()
         );
 
         try {
