@@ -1,5 +1,7 @@
 package com.cyverse.keycloak;
-import com.cyverse.keycloak.http.ListenerHttpClient;
+import com.cyverse.keycloak.http.ListenerHttpClientBase;
+import com.cyverse.keycloak.http.ListenerHttpClientWAuth;
+import com.cyverse.keycloak.http.ListenerHttpClientWoAuth;
 import com.cyverse.keycloak.http.TokenService;
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.irods.service.IrodsServiceImpl;
@@ -34,7 +36,7 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
         return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService);
     }
 
-    private boolean testConnection(ListenerHttpClient httpClient) {
+    private boolean testConnection(ListenerHttpClientBase httpClient) {
         int retries = 5;
         while (retries-- != 0) {
             try {
@@ -52,13 +54,23 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
 
     @Override
     public void init(Config.Scope config) {
+        String host = config.get("api-service-host");
+
+        String apiKey = config.get("api-key");
         String serviceMail = config.get("service-mail");
         String servicePassword = config.get("service-password");
-        TokenService tokenService = new TokenService(serviceMail, servicePassword);
 
-        String host = config.get("api-service-host");
-        String apiKey = config.get("api-key");
-        ListenerHttpClient httpClient = new ListenerHttpClient(host, apiKey, tokenService);
+        ListenerHttpClientBase httpClient;
+
+        if (apiKey == null || apiKey.isEmpty()
+                || serviceMail == null || serviceMail.isEmpty()
+                || servicePassword == null || servicePassword.isEmpty()) {
+            httpClient = new ListenerHttpClientWoAuth(host);
+        } else {
+            TokenService tokenService = new TokenService(serviceMail, servicePassword);
+            httpClient = new ListenerHttpClientWAuth(host, apiKey, tokenService);
+        }
+
         boolean connected = testConnection(httpClient);
 
         if (connected) {

@@ -1,6 +1,7 @@
 package com.cyverse.keycloak.ldap.service;
 
-import com.cyverse.keycloak.http.ListenerHttpClient;
+import com.cyverse.keycloak.http.ListenerHttpClientBase;
+import com.cyverse.keycloak.http.ListenerHttpClientWAuth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
@@ -16,12 +17,12 @@ import java.util.Map;
  */
 public class LdapServiceImpl implements LdapService {
     private static final Logger logger = Logger.getLogger(LdapServiceImpl.class);
-    private final ListenerHttpClient httpClient;
+    private final ListenerHttpClientBase httpClient;
 
     private static final String LDAP_USERS_ENDPOINT = "/api/users/ldap";
     private static final String LDAP_GROUPS_ENDPOINT = "/api/groups/ldap";
 
-    public LdapServiceImpl(ListenerHttpClient httpClient) {
+    public LdapServiceImpl(ListenerHttpClientBase httpClient) {
         this.httpClient = httpClient;
     }
 

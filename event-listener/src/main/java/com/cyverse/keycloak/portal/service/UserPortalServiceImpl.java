@@ -1,6 +1,7 @@
 package com.cyverse.keycloak.portal.service;
 
-import com.cyverse.keycloak.http.ListenerHttpClient;
+import com.cyverse.keycloak.http.ListenerHttpClientBase;
+import com.cyverse.keycloak.http.ListenerHttpClientWAuth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
@@ -16,11 +17,11 @@ import java.util.Map;
  */
 public class UserPortalServiceImpl implements UserPortalService {
     private static final Logger logger = Logger.getLogger(UserPortalServiceImpl.class);
-    private final ListenerHttpClient httpClient;
+    private final ListenerHttpClientBase httpClient;
 
     private static final String PORTAL_USERS_ENDPOINT = "/api/users/portal";
 
-    public UserPortalServiceImpl(ListenerHttpClient httpClient) {
+    public UserPortalServiceImpl(ListenerHttpClientBase httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -52,7 +53,7 @@ public class UserPortalServiceImpl implements UserPortalService {
 
             logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
 
-            if (response.statusCode() == HttpStatus.SC_OK) {
+            if (response.statusCode() == HttpStatus.SC_CREATED) {
                 logger.info("Successfully added user " + user.getUsername() + " in User Portal");
             }
         } catch (JsonProcessingException jsonExc) {
