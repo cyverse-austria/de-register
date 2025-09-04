@@ -1,6 +1,7 @@
 package com.cyverse.keycloak.irods.service;
 
-import com.cyverse.keycloak.http.ListenerHttpClient;
+import com.cyverse.keycloak.http.ListenerHttpClientBase;
+import com.cyverse.keycloak.http.ListenerHttpClientWAuth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,11 +18,11 @@ import java.util.Map;
  */
 public class IrodsServiceImpl implements IrodsService {
     private static final Logger logger = Logger.getLogger(IrodsServiceImpl.class);
-    private final ListenerHttpClient httpClient;
+    private final ListenerHttpClientBase httpClient;
 
     private static final String IRODS_ENDPOINT = "/api/users/irods";
 
-    public IrodsServiceImpl(ListenerHttpClient httpClient) {
+    public IrodsServiceImpl(ListenerHttpClientBase httpClient) {
         this.httpClient = httpClient;
     }
 

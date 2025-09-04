@@ -34,7 +34,7 @@ public class TokenService {
      * further reuse.
      * @return the jwt token
      */
-    public String getToken(ListenerHttpClient httpClient) {
+    public String getToken(ListenerHttpClientWAuth httpClient) {
         Date now = new Date();
         if (currentToken == null || now.after(currentExpirationTime)) {
             logger.info("Token invalid: either expired or requesting the first time!");
