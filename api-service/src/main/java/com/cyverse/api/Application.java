@@ -4,11 +4,7 @@ import com.cyverse.api.config.ApiServiceConfig;
 import com.cyverse.api.controllers.*;
 import com.cyverse.api.exceptions.ExceptionHandler;
 import com.cyverse.api.exceptions.UnauthorizedAccessException;
-import com.cyverse.api.services.AuthService;
-import com.cyverse.api.services.IrodsService;
-import com.cyverse.api.services.LdapService;
-import com.cyverse.api.services.UserPortalService;
-import com.cyverse.api.services.PasswordService;
+import com.cyverse.api.services.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.javalin.Javalin;
@@ -70,6 +66,13 @@ public class Application {
         // services
         PasswordService passwordService = new PasswordService();
 
+        MailService mailService;
+        if (appConfig.getMailServiceConfig() != null) {
+            mailService = new MailServiceImpl(appConfig.getMailServiceConfig());
+        } else {
+            mailService = new NoOpMailServiceImpl();
+        }
+
         IrodsService irodsService = new IrodsService(
                 appConfig.getIrodsServiceConfig(), passwordService);
         LdapService ldapService = new LdapService(
@@ -116,6 +119,9 @@ public class Application {
 
         UserPortalController userPortalController = new UserPortalController(userPortalService);
         app.post("/api/users/portal", userPortalController::addUserPortalUser);
+
+        MailController mailController = new MailController(mailService, passwordService);
+        app.put("/api/users/notification", mailController::sendPasswordNotification);
     }
 
     private static ApiServiceConfig loadConfig(String filePath) throws Exception {

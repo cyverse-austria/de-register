@@ -24,3 +24,5 @@ userPortalServiceConfig:
   # a specific formula. sending plain "first_name: test_name" will not work. By using this
   # divisor we make sure to send the correct fields that portal will understand.
   # (e.g. "7: test_name")
+mailServiceConfig:
+  host: http://192.168.31.115:25

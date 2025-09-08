@@ -46,7 +46,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
+        doReturn("testpass").when(passwordService).generatePasswordAndGet("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
@@ -70,7 +70,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
+        doReturn("testpass").when(passwordService).generatePasswordAndGet("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
@@ -95,7 +95,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
+        doReturn("testpass").when(passwordService).generatePasswordAndGet("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
@@ -123,7 +123,7 @@ public class LdapServiceTest {
         user.setLastName("user");
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
-        doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
+        doReturn("testpass").when(passwordService).generatePasswordAndGet("test_user");
         doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";

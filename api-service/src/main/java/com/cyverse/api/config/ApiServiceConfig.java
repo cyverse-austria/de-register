@@ -10,6 +10,7 @@ public class ApiServiceConfig implements GenericConfig {
     private LdapServiceConfig ldapServiceConfig;
     private AuthConfig authConfig;
     private UserPortalServiceConfig userPortalServiceConfig;
+    private MailServiceConfig mailServiceConfig;
 
     private static Integer DEFAULT_PORT = 7000;
 
@@ -30,6 +31,9 @@ public class ApiServiceConfig implements GenericConfig {
         }
         if (authConfig != null) {
             authConfig.verifyFieldsAreSet();
+        }
+        if (mailServiceConfig != null) {
+            mailServiceConfig.verifyFieldsAreSet();
         }
         irodsServiceConfig.verifyFieldsAreSet();
         ldapServiceConfig.verifyFieldsAreSet();
