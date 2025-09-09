@@ -1,6 +1,7 @@
 package com.cyverse.api.services;
 
 import com.cyverse.api.config.MailServiceConfig;
+import com.cyverse.api.exceptions.ResourceAlreadyExistsException;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
@@ -10,7 +11,9 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Mail service based on jakarta.mail.
@@ -18,9 +21,11 @@ import java.util.Properties;
 public class MailServiceImpl implements MailService {
     private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
     private MailServiceConfig config;
+    private Set<String> mailsAlreadySent;
 
     public MailServiceImpl(MailServiceConfig config) {
         this.config = config;
+        this.mailsAlreadySent = new HashSet<>();
     }
 
     /**
@@ -28,7 +33,12 @@ public class MailServiceImpl implements MailService {
      *  library functionalities.
      */
     @Override
-    public void sendEmail(String emailTo, String password) throws MessagingException {
+    public void sendEmail(String emailTo, String password)
+            throws MessagingException, ResourceAlreadyExistsException {
+        if (mailsAlreadySent.contains(emailTo)) {
+            throw new ResourceAlreadyExistsException("Notification was already sent to this email");
+        }
+
         logger.debug("Sending mail to {} with LDAP/iRODS", emailTo);
 
         String from = config.getFromSender();
@@ -50,10 +60,11 @@ public class MailServiceImpl implements MailService {
                 InternetAddress.parse(emailTo)
         );
         message.setSubject(subject);
-        message.setText(body);
+        message.setContent(body, "text/html");
 
         Transport.send(message);
 
+        this.mailsAlreadySent.add(emailTo);
         logger.debug("Mail sent successfully to {}", emailTo);
     }
 }

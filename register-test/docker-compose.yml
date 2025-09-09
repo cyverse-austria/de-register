@@ -29,3 +29,14 @@ services:
       KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_SERVICE_PASSWORD: testpass
     ports:
       - "8087:8080"
+
+  smarthost:
+    image: imixs/exim4:latest
+    pull_policy: always
+    restart: unless-stopped
+    environment:
+      EXIM_SMARTHOST: <your_smtp_server>
+      EXIM_PASSWORD: <secret>
+      EXIM_MESSAGE_SIZE_LIMIT: 255M
+    ports:
+      - "25:25"

@@ -1,5 +1,6 @@
 package com.cyverse.api.controllers;
 
+import com.cyverse.api.exceptions.ResourceAlreadyExistsException;
 import com.cyverse.api.exceptions.UserException;
 import com.cyverse.api.models.UserModel;
 import com.cyverse.api.services.MailService;
@@ -30,7 +31,7 @@ public class MailController {
         responses = {@OpenApiResponse(status = "200")}
     )
     public void sendPasswordNotification(Context ctx)
-            throws UserException, MessagingException {
+            throws UserException, MessagingException, ResourceAlreadyExistsException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         validateUser(user);
         String password = passwordService.getPassword(user.getUsername());
