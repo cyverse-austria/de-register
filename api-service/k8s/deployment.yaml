@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-service-swagger-config
+data:
+  config.yaml: |
+    port: 7000
+    irodsServiceConfig:
+      password: <path:secrets/invenio/data/apiservice#IRODS_PASSWORD>
+      zone: "TUG"
+      ipcServices: false
+    ldapServiceConfig:
+      host: "ldap://192.168.31.115:389/"
+      admin: "cn=Manager,dc=example,dc=org"
+      password: "notreal"
+      baseDN: "dc=example,dc=org"
+      everyoneGroup: "everyone"
+    #authConfig:
+    #  apiKey: "<api_key>"
+    #  tokenIssuer: "http://api-service.cyverse.at"
+    #  users:
+    #    test_user:
+    #      mail: "test.user@example.com"
+    #      password: "testpass"
+    userPortalServiceConfig:
+      host: http://192.168.31.115:3000
+      hmacKey: <SECRET> # portal equivalent in ENV config: HMAC_KEY
+      divisor: 7 # portal equivalent in ENV config: HONEYPOT_DIVISOR
+      # This field is used to compute the first and last name fields for api requests with
+      # a specific formula. sending plain "first_name: test_name" will not work. By using this
+      # divisor we make sure to send the correct fields that portal will understand.
+      # (e.g. "7: test_name")
+    mailServiceConfig:
+      host: mailgateway.mailserver.svc.cluster.local
+      port: 25
+      fromSender: api-service@tugraz.at
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service-swagger
+  labels:
+    app: api-service-swagger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-service-swagger
+  template:
+    metadata:
+      labels:
+        app: api-service-swagger
+    spec:
+      containers:
+        - name: api-service-swagger
+          image: ghcr.io/edivalentinitu/de-register-api-service:mailsender
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7000
+          args:
+            - "api"
+            - "/etc/api-service-swagger/config.yaml"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/api-service-swagger/config.yaml
+              subPath: config.yaml
+          env:
+            - name: IRODS_HOST
+              value: "qa-ies.cyverse.at"
+            - name: IRODS_USER_NAME
+              value: "portal"
+            - name: IRODS_ZONE_NAME
+              value: "TUG"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: api-service-swagger-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service-swagger-app
+spec:
+  selector:
+    app: api-service-swagger
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-service-swagger-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/auth-url: "https://auth.k3s.cyverse.at/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://auth.k3s.cyverse.at/oauth2/start?rd=https://$host$request_uri"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-Auth-Request-Email,X-Auth-Request-User"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api-service-swagger.k3s.cyverse.at
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service-swagger-app
+                port:
+                  number: 7000
