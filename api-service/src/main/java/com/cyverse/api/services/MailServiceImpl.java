@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+/**
+ * Mail service based on jakarta.mail.
+ */
 public class MailServiceImpl implements MailService {
     private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
     private MailServiceConfig config;
@@ -26,7 +29,9 @@ public class MailServiceImpl implements MailService {
      */
     @Override
     public void sendEmail(String emailTo, String password) throws MessagingException {
-        String from = "sender@example.com";
+        logger.debug("Sending mail to {} with LDAP/iRODS", emailTo);
+
+        String from = config.getFromSender();
         String subject = "CyVerse LDAP/iRODS password";
         String body = "A new LDAP and iRODS password was generated for this user: <b>" + password + "</b>";
 
@@ -48,5 +53,7 @@ public class MailServiceImpl implements MailService {
         message.setText(body);
 
         Transport.send(message);
+
+        logger.debug("Mail sent successfully to {}", emailTo);
     }
 }
