@@ -25,15 +25,14 @@ public class MailServiceImpl implements MailService {
      *  library functionalities.
      */
     @Override
-    public void sendEmail(String email, String password) throws MessagingException {
+    public void sendEmail(String emailTo, String password) throws MessagingException {
         String from = "sender@example.com";
-        String to = "recipient@example.com";
-        String subject = "Test Subject";
-        String body = "Test body";
+        String subject = "CyVerse LDAP/iRODS password";
+        String body = "A new LDAP and iRODS password was generated for this user: <b>" + password + "</b>";
 
         Properties props = new Properties();
         props.put("mail.smtp.host", config.getHost());
-        props.put("mail.smtp.port", 25);
+        props.put("mail.smtp.port", config.getPort());
         props.put("mail.smtp.auth", "false");
         props.put("mail.smtp.starttls.enable", "false");
 
@@ -43,7 +42,7 @@ public class MailServiceImpl implements MailService {
         message.setFrom(new InternetAddress(from));
         message.setRecipients(
                 Message.RecipientType.TO,
-                InternetAddress.parse(to)
+                InternetAddress.parse(emailTo)
         );
         message.setSubject(subject);
         message.setText(body);
