@@ -7,6 +7,9 @@ import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.irods.service.IrodsServiceImpl;
 import com.cyverse.keycloak.irods.service.NoOpIrodsServiceImpl;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.notification.service.NoOpNotificationServiceImpl;
+import com.cyverse.keycloak.notification.service.NotificationService;
+import com.cyverse.keycloak.notification.service.NotificationServiceImpl;
 import com.cyverse.keycloak.portal.service.NoOpUserPortalServiceImpl;
 import com.cyverse.keycloak.portal.service.UserPortalService;
 import com.cyverse.keycloak.portal.service.UserPortalServiceImpl;
@@ -30,10 +33,11 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
     private LdapService ldapService;
     private IrodsService irodsService;
     private UserPortalService userPortalService;
+    private NotificationService notificationService;
 
     @Override
     public EventListenerProvider create(KeycloakSession session) {
-        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService);
+        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService, notificationService);
     }
 
     private boolean testConnection(ListenerHttpClientBase httpClient) {
@@ -77,10 +81,12 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
             irodsService = new IrodsServiceImpl(httpClient);
             ldapService = new LdapServiceImpl(httpClient);
             userPortalService = new UserPortalServiceImpl(httpClient);
+            notificationService = new NotificationServiceImpl(httpClient);
         } else {
             irodsService = new NoOpIrodsServiceImpl();
             ldapService = new NoOpLdapServiceImpl();
             userPortalService = new NoOpUserPortalServiceImpl();
+            notificationService = new NoOpNotificationServiceImpl();
         }
     }
 

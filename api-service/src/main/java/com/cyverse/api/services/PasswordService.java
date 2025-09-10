@@ -4,19 +4,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Password generator and storage for API users.
+ */
 public class PasswordService {
-    private final Map<String, String> currentUsers;
+
+    private final Map<String, String> userToPasswordMapping;
 
     public PasswordService() {
-        this.currentUsers = new HashMap<>();
+        this.userToPasswordMapping = new HashMap<>();
     }
 
     /**
      * Generate a random user specific password and return it.
      */
-    public String getGeneratedPassword(String username) {
-        if (currentUsers.containsKey(username)) {
-            return currentUsers.get(username);
+    public String generatePasswordAndGet(String username) {
+        if (userToPasswordMapping.containsKey(username)) {
+            return userToPasswordMapping.get(username);
         }
 
         String randomSection = new Random().ints(
@@ -29,7 +33,11 @@ public class PasswordService {
                 .toString();
         String generatedPassword = username.substring(0, 3) + randomSection;
 
-        this.currentUsers.put(username, generatedPassword);
+        this.userToPasswordMapping.put(username, generatedPassword);
         return generatedPassword;
+    }
+
+    public String getPassword(String username) {
+        return userToPasswordMapping.get(username);
     }
 }

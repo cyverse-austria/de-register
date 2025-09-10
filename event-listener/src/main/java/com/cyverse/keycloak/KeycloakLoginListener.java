@@ -2,6 +2,7 @@ package com.cyverse.keycloak;
 
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.notification.service.NotificationService;
 import com.cyverse.keycloak.portal.service.UserPortalService;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
@@ -23,15 +24,18 @@ public class KeycloakLoginListener implements EventListenerProvider {
     private final LdapService ldapService;
     private final IrodsService irodsService;
     private final UserPortalService userPortalService;
+    private final NotificationService notificationService;
 
     public KeycloakLoginListener(KeycloakSession session,
                                  LdapService ldapService,
                                  IrodsService irodsService,
-                                 UserPortalService userPortalService) {
+                                 UserPortalService userPortalService,
+                                 NotificationService notificationService) {
         this.session = session;
         this.ldapService = ldapService;
         this.irodsService = irodsService;
         this.userPortalService = userPortalService;
+        this.notificationService = notificationService;
     }
 
     private void performLdapActions(UserModel user) {
@@ -52,6 +56,10 @@ public class KeycloakLoginListener implements EventListenerProvider {
 
     private void performUserPortalActions(UserModel user) {
         userPortalService.addUserToPortal(user);
+    }
+
+    private void performNotificationActions(UserModel user) {
+        notificationService.notifyUser(user);
     }
 
     /**
@@ -75,6 +83,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
             performLdapActions(user);
             performIrodsActions(user);
             performUserPortalActions(user);
+            performNotificationActions(user);
         }
     }
 

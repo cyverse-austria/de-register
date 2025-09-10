@@ -52,7 +52,7 @@ public class IrodsService {
                                 + " rodsuser");
         runProcess(addUsercommand);
         runProcess(buildChangePasswordCommand(username,
-                passwordService.getGeneratedPassword(username)));
+                passwordService.generatePasswordAndGet(username)));
     }
 
     /**

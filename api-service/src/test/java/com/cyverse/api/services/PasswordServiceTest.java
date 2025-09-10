@@ -8,8 +8,8 @@ public class PasswordServiceTest {
     @Test
     void testSamePassword() {
         PasswordService passwordService = new PasswordService();
-        String firstPass = passwordService.getGeneratedPassword("test");
-        String secondPass = passwordService.getGeneratedPassword("test");
+        String firstPass = passwordService.generatePasswordAndGet("test");
+        String secondPass = passwordService.generatePasswordAndGet("test");
 
         Assertions.assertEquals(firstPass, secondPass);
     }

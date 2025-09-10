@@ -1,0 +1,111 @@
+# example deployment for testing purposes. do not use in production instance.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-service-swagger-config
+data:
+  config.yaml: |
+    port: 7000
+    irodsServiceConfig:
+      password: <path:secrets/invenio/data/apiservice#IRODS_PASSWORD>
+      zone: "TUG"
+      ipcServices: false
+    ldapServiceConfig:
+      host: <path:secrets/invenio/data/apiservice#LDAP_HOST>
+      admin: <path:secrets/invenio/data/apiservice#LDAP_ADMIN>
+      password: <path:secrets/invenio/data/apiservice#LDAP_PASSWORD>
+      baseDN: <path:secrets/invenio/data/apiservice#LDAP_BASE_DN>
+      everyoneGroup: <path:secrets/invenio/data/apiservice#LDAP_EVERYONE_GROUP>
+    
+    # auth disabled for the moment in k8s
+    #authConfig:
+    #  apiKey: "<api_key>"
+    #  tokenIssuer: "http://api-service.cyverse.at"
+    #  users:
+    #    test_user:
+    #      mail: "test.user@example.com"
+    #      password: "testpass"
+    
+    # user portal not used at the moment in k8s
+    userPortalServiceConfig:
+      host: http://192.168.31.115:3000
+      hmacKey: <SECRET>
+      divisor: 7 
+    mailServiceConfig:
+      host: <path:secrets/invenio/data/apiservice#MAIL_HOST>
+      port: 25
+      fromSender: noreply@smtp.cyverse.at
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service-swagger
+  labels:
+    app: api-service-swagger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-service-swagger
+  template:
+    metadata:
+      labels:
+        app: api-service-swagger
+    spec:
+      containers:
+        - name: api-service-swagger
+          image: ghcr.io/cyverse-austria/de-register-api-service:main
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7000
+          args:
+            - "api"
+            - "/etc/api-service-swagger/config.yaml"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/api-service-swagger/config.yaml
+              subPath: config.yaml
+          env:
+            - name: IRODS_HOST
+              value: <path:secrets/invenio/data/apiservice#IRODS_HOST>
+            - name: IRODS_USER_NAME
+              value: "portal"
+            - name: IRODS_ZONE_NAME
+              value: "TUG"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: api-service-swagger-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service-swagger-app
+spec:
+  selector:
+    app: api-service-swagger
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-service-swagger-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api-service-swagger.k3s.cyverse.at
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service-swagger-app
+                port:
+                  number: 7000

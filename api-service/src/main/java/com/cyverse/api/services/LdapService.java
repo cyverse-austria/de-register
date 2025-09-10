@@ -247,7 +247,7 @@ public class LdapService {
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
         attrs.put("userPassword", generateSSHAHash(
-                passwordService.getGeneratedPassword(user.getUsername())));
+                passwordService.generatePasswordAndGet(user.getUsername())));
 
         // TODO Just for testing now. Decide if needed
         attrs.put("title", "University/College Staff");
