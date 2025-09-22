@@ -47,7 +47,6 @@ public class LdapServiceTest {
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
         doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
-        doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
         Attributes attrs = buildCommonAttributes(user);
@@ -71,7 +70,6 @@ public class LdapServiceTest {
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
         doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
-        doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
         Attributes attrs = buildCommonAttributes(user);
@@ -96,7 +94,6 @@ public class LdapServiceTest {
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
         doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
-        doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
         ModificationItem[] expectedMods = buildMods(user);
@@ -124,7 +121,6 @@ public class LdapServiceTest {
 
         doReturn("dc=example,dc=org").when(config).getBaseDN();
         doReturn("testpass").when(passwordService).getGeneratedPassword("test_user");
-        doReturn("{SSHA}testpasshashed1234").when(ldapService).generateSSHAHash("testpass");
 
         String expectedEntryDN = "uid=test_user,ou=People,dc=example,dc=org";
 
@@ -222,7 +218,6 @@ public class LdapServiceTest {
         attrs.put("gidNumber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
-        attrs.put("userPassword", "{SSHA}testpasshashed1234");
         attrs.put("title", "University/College Staff");
         attrs.put("o", "Graz University of Technology");
 
