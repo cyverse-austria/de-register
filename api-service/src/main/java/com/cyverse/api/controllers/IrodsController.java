@@ -60,4 +60,24 @@ public class IrodsController {
         irodsService.grantAccessToUser(user.getUsername());
         ctx.status(HttpStatus.OK);
     }
+
+    @OpenApi(
+            summary = "Add password attribute to an already existing iRODS account",
+            operationId = "addPasswordToIrodsUser",
+            path = "/api/users/irods/password",
+            security = @OpenApiSecurity(name = "Bearer"),
+            methods = HttpMethod.PUT,
+            requestBody = @OpenApiRequestBody(
+                    content = {@OpenApiContent(from = UserModel.class)}
+            ),
+            responses = {@OpenApiResponse(status = "200")}
+    )
+    public void addPasswordToIrodsUser(Context ctx)
+            throws IOException, InterruptedException,
+            UserException, IrodsException {
+        UserModel user = ctx.bodyAsClass(UserModel.class);
+        user.validateUsername();
+        irodsService.addPasswordToUser(user.getUsername());
+        ctx.status(HttpStatus.OK);
+    }
 }

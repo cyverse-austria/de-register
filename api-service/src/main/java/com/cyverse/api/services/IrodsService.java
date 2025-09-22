@@ -51,8 +51,6 @@ public class IrodsService {
                                 + username
                                 + " rodsuser");
         runProcess(addUsercommand);
-        runProcess(buildChangePasswordCommand(username,
-                passwordService.getGeneratedPassword(username)));
     }
 
     /**
@@ -87,6 +85,17 @@ public class IrodsService {
         if (exc != null) {
             throw exc;
         }
+    }
+
+    /**
+     * Sets the password for an already existing irods user.
+     *
+     * @param username the user to set the password for
+     */
+    public void addPasswordToUser(String username)
+            throws IrodsException, IOException, InterruptedException {
+        runProcess(buildChangePasswordCommand(username,
+                passwordService.getGeneratedPassword(username)));
     }
 
     /**

@@ -80,4 +80,24 @@ public class LdapController {
         ldapService.addLdapUserToGroup(request.getUsername(), request.getGroup());
         ctx.status(HttpStatus.OK);
     }
+
+    @OpenApi(
+            summary = "Add password attribute to an already existing LDAP account",
+            operationId = "addPasswordToLdapUser",
+            path = "/api/users/ldap/password",
+            methods = HttpMethod.PUT,
+            security = @OpenApiSecurity(name = "Bearer"),
+            requestBody = @OpenApiRequestBody(
+                    content = {@OpenApiContent(from = UserModel.class)}
+            ),
+            responses = {@OpenApiResponse(status = "200")}
+    )
+    public void addPasswordToLdapUser(Context ctx)
+            throws UserException, ResourceAlreadyExistsException,
+            NamingException, NoSuchAlgorithmException {
+        UserModel user = ctx.bodyAsClass(UserModel.class);
+        user.validateUsername();
+        ldapService.addPasswordToUser(user.getUsername());
+        ctx.status(HttpStatus.OK);
+    }
 }

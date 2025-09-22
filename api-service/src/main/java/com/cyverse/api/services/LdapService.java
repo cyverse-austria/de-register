@@ -147,6 +147,38 @@ public class LdapService {
         }
     }
 
+    /**
+     * Add password to an existing LDAP user.
+     *
+     * @param username the user to add to the group
+     */
+    public void addPasswordToUser(String username)
+            throws ResourceAlreadyExistsException, NamingException, NoSuchAlgorithmException {
+        logger.debug("Try setting password to LDAP user: {}", username);
+
+        String entryDN = "uid=" + username +",ou=People," + ldapConfig.getBaseDN();
+
+        try {
+            ModificationItem[] mods = new ModificationItem[1];
+            mods[0] = new ModificationItem(
+                    DirContext.ADD_ATTRIBUTE,
+                    new BasicAttribute("userPassword",
+                            generateSSHAHash(passwordService
+                                    .getGeneratedPassword(username)))
+            );
+            modifyAttrsSimple(entryDN, mods);
+            logger.info("Added password successfully to user: {}", username);
+        } catch (NamingException e) {
+            if (e instanceof AttributeInUseException) {
+                String msg = "User already has a password set";
+                logger.warn(msg);
+                throw new ResourceAlreadyExistsException(msg);
+            } else {
+                throw e;
+            }
+        }
+    }
+
     protected void addEntryDN(String entryDN, Attributes attrs) throws NamingException {
         DirContext ctx = new InitialDirContext(env);
         // TODO custom exception with message for empty optional
@@ -246,8 +278,6 @@ public class LdapService {
         attrs.put("gidNumber", "10013");
         attrs.put("homeDirectory", "/home/" + user.getUsername());
         attrs.put("loginShell", "/bin/bash");
-        attrs.put("userPassword", generateSSHAHash(
-                passwordService.getGeneratedPassword(user.getUsername())));
 
         // TODO Just for testing now. Decide if needed
         attrs.put("title", "University/College Staff");

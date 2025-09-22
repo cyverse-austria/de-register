@@ -75,7 +75,8 @@ public class Application {
         LdapService ldapService = new LdapService(
                 appConfig.getLdapServiceConfig(), passwordService);
         ldapService.init();
-        UserPortalService userPortalService = new UserPortalService(appConfig.getUserPortalServiceConfig());
+        UserPortalService userPortalService = new UserPortalService(
+                appConfig.getUserPortalServiceConfig(), passwordService);
         userPortalService.init();
 
         // authentication only if configured
@@ -108,11 +109,13 @@ public class Application {
         IrodsController irodsController = new IrodsController(irodsService);
         app.post("/api/users/irods", irodsController::addIrodsUser);
         app.put("/api/users/irods", irodsController::grantUserAccess);
+        app.put("/api/users/irods/password", irodsController::addPasswordToIrodsUser);
 
         LdapController ldapController = new LdapController(ldapService);
         app.post("/api/users/ldap", ldapController::addLdapUser);
         app.put("/api/users/ldap", ldapController::updateLdapUser);
         app.put("/api/groups/ldap", ldapController::addLdapUserToGroup);
+        app.put("/api/groups/ldap/password", ldapController::addPasswordToLdapUser);
 
         UserPortalController userPortalController = new UserPortalController(userPortalService);
         app.post("/api/users/portal", userPortalController::addUserPortalUser);

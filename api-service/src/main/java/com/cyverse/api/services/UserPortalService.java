@@ -29,6 +29,7 @@ public class UserPortalService {
     private final UserPortalServiceConfig config;
     private ApiHttpClient httpClient;
     private final Map<String, Integer> defaultProperties;
+    private final PasswordService passwordService;
 
     private static final String PORTAL_USERS_ENDPOINT = "/api/users";
     private static final String PORTAL_USERS_EXISTS_ENDPOINT = "/api/exists";
@@ -38,8 +39,9 @@ public class UserPortalService {
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final String PORTAL_STATUS_LOG = "PORTAL-API RESPONSE STATUS CODE: {}";
 
-    public UserPortalService(UserPortalServiceConfig config) {
+    public UserPortalService(UserPortalServiceConfig config, PasswordService passwordService) {
         this.config = config;
+        this.passwordService = passwordService;
         this.defaultProperties = new HashMap<>();
     }
 
@@ -197,6 +199,12 @@ public class UserPortalService {
         data.put(String.valueOf(config.getDivisor() + 2), user.getLastName());
         data.put("email", user.getEmail());
         data.put("department", "Other");
+        // this is needed because for the automated flow we rely on user portal to set the irods/ldap
+        // password, which is respectively set by the user. By setting the password from here, we "trick"
+        // the user portal to skip the user creation flow when the user sets the password the first time
+        // using the generated link received by mail, so that the only operations performed will be actual
+        // password changes, not new user creations.
+        data.put("password", passwordService.getGeneratedPassword(user.getUsername()));
         data.putAll(defaultProperties);
 
         Date now = new Date();
