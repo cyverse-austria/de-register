@@ -14,7 +14,7 @@ public class UserPortalServiceConfig implements GenericConfig {
         if (host == null || host.isEmpty()
                 || hmacKey == null || hmacKey.isEmpty()
                 || divisor == null) {
-            throw new ConfigException("host, hmacKey and divisor required for user portal configuration");
+            throw new ConfigException("host, hmacKey and divisor are required for user portal configuration");
         }
     }
 }

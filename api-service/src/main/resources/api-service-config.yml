@@ -18,7 +18,7 @@ authConfig:
       password: "testpass"
 userPortalServiceConfig:
   host: http://192.168.31.115:3000
-  hmacKey: <SECRET> # portal equivalent in ENV config: HMAC_KEY
+  hmacKey: <ADD SECRET HERE> # portal equivalent in ENV config: HMAC_KEY
   divisor: 7 # portal equivalent in ENV config: HONEYPOT_DIVISOR
   # This field is used to compute the first and last name fields for api requests with
   # a specific formula. sending plain "first_name: test_name" will not work. By using this
