@@ -12,6 +12,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
+import static org.keycloak.events.Details.AUTH_METHOD;
+
 /**
  * Event-listener for LOGIN events.
  */
@@ -63,7 +65,9 @@ public class KeycloakLoginListener implements EventListenerProvider {
      */
     @Override
     public void onEvent(Event event) {
-        if (!event.getType().equals(EventType.LOGIN)) {
+        if (!event.getType().equals(EventType.LOGIN)
+                || !event.getDetails().containsKey(AUTH_METHOD)
+                || !event.getDetails().get(AUTH_METHOD).equals("openid-connect")) {
             return;
         }
 
