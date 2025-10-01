@@ -10,7 +10,9 @@ import org.keycloak.representations.idm.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Application {
 
@@ -20,6 +22,8 @@ public class Application {
         public String ldapBindDn;
         public String ldapAdminPasswd;
         public String ldapUsersDn;
+        public String idpClientId;
+        public String idpClientSecret;
     }
 
     public static String TEST_REALM = "testrealm";
@@ -100,6 +104,11 @@ public class Application {
                 keycloak.realm(TEST_REALM).components().component(mapper.getId()).update(mapper);
             }
             System.out.println("Update LDAP mappers done");
+
+            // ---------- IDP (Github) --------------
+            System.out.println("Creating Github IDP");
+            keycloak.realm(TEST_REALM).identityProviders().create(getIDP(appConfig));
+            System.out.println("Done creating Github IDP");
         }
     }
 
@@ -153,6 +162,21 @@ public class Application {
         ldapComponent.setConfig(ldapParams);
 
         return ldapComponent;
+    }
+
+    private static IdentityProviderRepresentation getIDP(Config config) {
+        IdentityProviderRepresentation idpr = new IdentityProviderRepresentation();
+
+        idpr.setAlias("github");
+        idpr.setProviderId("github");
+        idpr.setEnabled(true);
+
+        Map<String, String> configMap = new HashMap<>();
+        configMap.put("clientId", config.idpClientId);
+        configMap.put("clientSecret", config.idpClientSecret);
+
+        idpr.setConfig(configMap);
+        return idpr;
     }
 
 
