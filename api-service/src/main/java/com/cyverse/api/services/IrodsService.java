@@ -69,7 +69,7 @@ public class IrodsService {
         if (irodsConfig.getIpcServices()) {
             if (isOwnershipAlreadyPresent(username, group, permission)) {
                 exc = new ResourceAlreadyExistsException(String.format(excMsg, group));
-                logger.warn("ipcservices already has permission for user {}", username);
+                logger.debug("ipcservices already has permission for user {}", username);
             }
             runProcess(buildChModCommand(permission, group, username));
         }
@@ -119,7 +119,9 @@ public class IrodsService {
         String errorLine = "";
         List<String> outputLines = new ArrayList<>();
         while ((line = reader.readLine()) != null) {
-            if (line.contains("ERROR") || line.contains("CAT_INVALID_AUTHENTICATION")) {
+            if (line.contains("ERROR")
+                    || line.contains("CAT_INVALID_AUTHENTICATION")
+                    || line.toLowerCase().contains("not found")) {
                 errorLine = line;
             }
             outputLines.add(line);

@@ -1,5 +1,6 @@
 package com.cyverse.api.controllers;
 
+import com.cyverse.api.exceptions.ResourceAlreadyExistsException;
 import com.cyverse.api.exceptions.UserException;
 import com.cyverse.api.exceptions.UserPortalException;
 import com.cyverse.api.models.UserModel;
@@ -27,7 +28,8 @@ public class UserPortalController {
         ),
         responses = {@OpenApiResponse(status = "201")}
     )
-    public void addUserPortalUser(Context ctx) throws UserException, UserPortalException {
+    public void addUserPortalUser(Context ctx)
+            throws UserException, UserPortalException, ResourceAlreadyExistsException {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         validateUser(user);
         userPortalService.addUserToPortal(user);

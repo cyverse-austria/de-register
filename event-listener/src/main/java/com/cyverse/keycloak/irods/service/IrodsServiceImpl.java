@@ -53,6 +53,8 @@ public class IrodsServiceImpl implements IrodsService {
 
             if (response.statusCode() == HttpStatus.SC_CREATED) {
                 logger.info("Successfully added user " + user.getUsername() + " to iRODS");
+            } else {
+                logger.warn(response.body());
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
@@ -89,6 +91,8 @@ public class IrodsServiceImpl implements IrodsService {
 
             if (response.statusCode() == HttpStatus.SC_OK) {
                 logger.info("Successfully granted initial access to user " + user.getUsername() + " in iRODS");
+            } else {
+                logger.warn(response.body());
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
