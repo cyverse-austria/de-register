@@ -55,6 +55,8 @@ public class UserPortalServiceImpl implements UserPortalService {
 
             if (response.statusCode() == HttpStatus.SC_CREATED) {
                 logger.info("Successfully added user " + user.getUsername() + " in User Portal");
+            } else {
+                logger.warn(response.body());
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());

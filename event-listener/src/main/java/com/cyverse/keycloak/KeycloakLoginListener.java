@@ -3,6 +3,7 @@ package com.cyverse.keycloak;
 import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.ldap.service.LdapService;
 import com.cyverse.keycloak.portal.service.UserPortalService;
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.logging.Logger;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
@@ -12,11 +13,16 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
-import static org.keycloak.events.Details.AUTH_METHOD;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Event-listener for LOGIN events.
  */
+@Slf4j
 public class KeycloakLoginListener implements EventListenerProvider {
 
     private static final Logger logger = Logger.getLogger(KeycloakLoginListener.class);
@@ -25,6 +31,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
     private final LdapService ldapService;
     private final IrodsService irodsService;
     private final UserPortalService userPortalService;
+    private final Map<String, Instant> minTimeBetweenLogins;
 
     public KeycloakLoginListener(KeycloakSession session,
                                  LdapService ldapService,
@@ -34,6 +41,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
         this.ldapService = ldapService;
         this.irodsService = irodsService;
         this.userPortalService = userPortalService;
+        this.minTimeBetweenLogins = new ConcurrentHashMap<>();
     }
 
     private void performLdapActions(UserModel user) {
@@ -57,6 +65,32 @@ public class KeycloakLoginListener implements EventListenerProvider {
     }
 
     /**
+     * Helper method to avoid triggering consecutive API actions for the same LOGIN
+     * event. Because some Keycloak authentication flows (e.g. IDP) can trigger for
+     * one logical login multiple LOGIN events and for others not, it's hard to
+     * differentiate between the variety of possible login events.
+     * This algorithm should address this issue by temporarily storing a "red light"
+     * time of 10s for a user in which no actions can be triggered (following the
+     * supposition that the user does not try to authenticate 2 times in less than
+     * 10s). After this time has passed permit actions again.
+     * This helps avoid unnecessary traffic and cleanup the logs without the need of
+     * additional persistence.
+     */
+    private boolean canTriggerActions(UserModel user) {
+        Instant canTriggerTime = minTimeBetweenLogins.get(user.getUsername());
+        Instant now = Instant.now();
+
+        if (canTriggerTime == null || now.isAfter(canTriggerTime)) {
+            Instant nextActionTrigger = Instant.now().plus(10, ChronoUnit.SECONDS);
+            minTimeBetweenLogins.put(user.getUsername(), nextActionTrigger);
+            return true;
+        }
+
+        logger.warn("Login event immediately after another.");
+        return false;
+    }
+
+    /**
      * Perform actions based on keycloak events.
      * Actions supported in this implementation: LDAP User update, iRODS account
      * creation, User Portal DB user creation.
@@ -65,9 +99,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
      */
     @Override
     public void onEvent(Event event) {
-        if (!event.getType().equals(EventType.LOGIN)
-                || !event.getDetails().containsKey(AUTH_METHOD)
-                || !event.getDetails().get(AUTH_METHOD).equals("openid-connect")) {
+        if (!event.getType().equals(EventType.LOGIN)) {
             return;
         }
 
@@ -75,7 +107,9 @@ public class KeycloakLoginListener implements EventListenerProvider {
         RealmModel sessionRealm = session.getContext().getRealm();
         UserModel user = session.users().getUserById(sessionRealm, event.getUserId());
 
-        if (user != null && !sessionRealm.getName().contains("master")) {
+        if (user != null
+                && !sessionRealm.getName().contains("master")
+                && canTriggerActions(user)) {
             performLdapActions(user);
             performIrodsActions(user);
             performUserPortalActions(user);

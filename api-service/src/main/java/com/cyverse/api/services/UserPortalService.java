@@ -1,6 +1,8 @@
 package com.cyverse.api.services;
 
 import com.cyverse.api.config.UserPortalServiceConfig;
+import com.cyverse.api.exceptions.ResourceAlreadyExistsException;
+import com.cyverse.api.exceptions.UserException;
 import com.cyverse.api.exceptions.UserPortalException;
 import com.cyverse.api.models.UserModel;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,10 +57,10 @@ public class UserPortalService {
      *
      * @param user the UserModel that comes from Keycloak data-model
      */
-    public void addUserToPortal(UserModel user) throws UserPortalException {
+    public void addUserToPortal(UserModel user)
+            throws UserPortalException, ResourceAlreadyExistsException {
         if (userExists(user.getUsername())) {
-            logger.debug("User already exists, exiting ...");
-            return;
+            throw new ResourceAlreadyExistsException("User already registered in portal");
         }
 
         setDefaultIDs();
@@ -83,7 +85,9 @@ public class UserPortalService {
             logger.debug(PORTAL_STATUS_LOG, response.statusCode());
 
             if (response.statusCode() == HttpStatus.SC_OK) {
-                logger.info("Successfully added user {} in User Portal", user.getUsername());
+                logger.debug("Successfully added user {} in User Portal", user.getUsername());
+            } else {
+                throw new UserPortalException("Could not add user to portal. " + response.body());
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: {}\n{}", user.getUsername(), jsonExc.getMessage());
@@ -120,11 +124,8 @@ public class UserPortalService {
                 return false;
             }
 
-            if (response.statusCode() == HttpStatus.SC_OK
-                    && parsedResponse.get(USERNAME_FIELD)
-                    .getClass()
-                    .isAssignableFrom(String.class)) {
-                return true;
+            if (response.statusCode() == HttpStatus.SC_OK) {
+                return (Boolean) parsedResponse.get(USERNAME_FIELD);
             }
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: {}\n{}", username, jsonExc.getMessage());

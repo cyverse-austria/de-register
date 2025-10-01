@@ -21,47 +21,42 @@ public class ExceptionHandler {
         // HTTP exceptions
         app.exception(UnauthorizedAccessException.class, (e, ctx) -> {
             String msg = String.format("Forbidden access: %s", e.getMessage());
-            logger.error(msg);
             ctx.status(HttpStatus.UNAUTHORIZED);
             ctx.json(writeJsonErr(msg));
         });
 
         app.exception(JWTVerificationException.class, (e, ctx) -> {
             String msg = String.format("Failed JWT verification: %s", e.getMessage());
-            logger.error(msg);
             ctx.status(HttpStatus.UNAUTHORIZED);
             ctx.json(writeJsonErr(msg));
         });
 
         app.exception(ResourceAlreadyExistsException.class, (e, ctx) -> {
-            logger.warn("Resource already exists: {}", e.getMessage());
+            String msg = String.format("Resource already exists: %s", e.getMessage());
             ctx.status(HttpStatus.CONFLICT);
+            ctx.json(writeJsonErr(msg));
         });
 
         app.exception(UserException.class, (e, ctx) -> {
             String msg = String.format("Bad request error: %s", e.getMessage());
-            logger.error(msg);
             ctx.status(HttpStatus.BAD_REQUEST);
             ctx.json(writeJsonErr(msg));
         });
 
         app.exception(IrodsException.class, (e, ctx) -> {
             String msg = String.format("iRODS Error: %s", e.getMessage());
-            logger.error(msg);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(writeJsonErr(msg));
         });
 
         app.exception(NamingException.class, (e, ctx) -> {
             String msg = String.format("LDAP Error: %s", e.getMessage());
-            logger.error(msg);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(writeJsonErr(msg));
         });
 
         app.exception(Exception.class, (e, ctx) -> {
             String msg = String.format("Internal server error: %s", e.getMessage());
-            logger.error(msg);
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.json(writeJsonErr(msg));
         });

@@ -12,6 +12,7 @@ import org.mockito.Spy;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,6 +73,7 @@ public class IrodsServiceTest {
         doReturn(false).when(config).getIpcServices();
         doReturn("TUG").when(config).getZone();
         doReturn("testpass").when(config).getPassword();
+        doReturn(Collections.emptyList()).when(irodsService).runProcess(any());
 
         List<String> chmodCmd = Arrays.asList(
                 "bash", "-c",

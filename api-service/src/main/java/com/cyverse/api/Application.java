@@ -47,6 +47,7 @@ public class Application {
                             swaggerConfig.setDocumentationPath("/openapi.json")));
                     config.registerPlugin(new ReDocPlugin(redocConfig ->
                             redocConfig.setDocumentationPath("/openapi.json")));
+                    config.bundledPlugins.enableDevLogging();
                     }
                 )
                 .start(appConfig.getPort());

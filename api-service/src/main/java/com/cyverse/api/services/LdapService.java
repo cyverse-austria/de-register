@@ -64,7 +64,7 @@ public class LdapService {
             attrs.get("objectClass").add("inetOrgPerson");
 
             addEntryDN(entryDN, attrs);
-            logger.info("LDAP user added successfully: {}", user.getUsername());
+            logger.debug("LDAP user added successfully: {}", user.getUsername());
         } catch (NamingException e) {
             if (e.getMessage().contains("Entry Already Exists")) {
                 logger.debug("User {} already registered in LDAP", user.getUsername());
@@ -102,7 +102,7 @@ public class LdapService {
             }
 
             modifyAttrsExtraOperation(entryDN, newAttrs);
-            logger.info("LDAP user successfully updated: {}", user.getUsername());
+            logger.debug("LDAP user successfully updated: {}", user.getUsername());
         } catch (NamingException e) {
             if (e instanceof AttributeInUseException) {
                 throw new ResourceAlreadyExistsException("Attribute already in use: " + e.getMessage());
@@ -135,11 +135,11 @@ public class LdapService {
                     new BasicAttribute("memberUid", username)
             );
             modifyAttrsSimple(groupDn, mods);
-            logger.info("LDAP user: {} added successfully to group: {}", username, group);
+            logger.debug("LDAP user: {} added successfully to group: {}", username, group);
         } catch (NamingException e) {
             if (e instanceof AttributeInUseException) {
                 String msg = "User is already a member of the group.";
-                logger.warn(msg);
+                logger.debug(msg);
                 throw new ResourceAlreadyExistsException(msg);
             } else {
                 throw e;
@@ -167,11 +167,11 @@ public class LdapService {
                                     .getGeneratedPassword(username)))
             );
             modifyAttrsSimple(entryDN, mods);
-            logger.info("Added password successfully to user: {}", username);
+            logger.debug("Added password successfully to user: {}", username);
         } catch (NamingException e) {
             if (e instanceof AttributeInUseException) {
                 String msg = "User already has a password set";
-                logger.warn(msg);
+                logger.debug(msg);
                 throw new ResourceAlreadyExistsException(msg);
             } else {
                 throw e;
