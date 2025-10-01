@@ -1,5 +1,10 @@
 #!/bin/bash
 
+newlines() {
+  echo ""
+  echo ""
+}
+
 if [ $# != 2 ]; then
   echo "USAGE: ./run-tests.sh <service> <client-secret>"
   exit 1
@@ -11,11 +16,22 @@ if [ -n "$api_container_id" ]; then
   docker stop $api_container_id
 fi
 
+# install de-register
+cd ../api-service
+mvn clean package
+cd ../event-listener
+mvn clean install
+
+cd ../register-test
+
+newlines
 echo "Start api-service"
 docker build --build-arg APP_VERSION=0.0.1 -t api-service ../api-service/
 docker run --rm -it \
  -e IRODS_HOST=qa-ies.cyverse.at -e IRODS_USER_NAME=portal -e IRODS_ZONE_NAME=TUG -e AUTH_SECRET=test_secret -p 7000:7000 -d api-service api
 
+newlines
+echo "Deploying docker services"
 docker compose down
 docker compose up -d --build
 
@@ -31,6 +47,7 @@ until docker exec -i $db_container_id psql -U postgres -c '\l' > /dev/null 2>&1;
   sleep 1
 done
 
+newlines
 echo "Creating Keycloak DB"
 docker exec -i $db_container_id psql -U postgres -c "create user keycloak with password 'keycloak';"
 docker exec -i $db_container_id psql -U postgres -c "create database keycloak with owner keycloak;"
@@ -45,16 +62,20 @@ done
 
 mvn clean package
 
-
+newlines
 if [ "$1" = "portal" ]; then
 
   echo "Creating Keycloak setup: realm, client, users."
   java -jar target/register-test.jar ./src/main/resources/test-config.yml portal 3000 $2
 
+  newlines
+  echo "Creating portal database, user"
   docker exec -i $db_container_id psql -U postgres -c "create user portal_db_reader with password 'admin';"
   docker exec -i $db_container_id psql -U postgres -c "create database portal with owner portal_db_reader;"
   docker exec -i $db_container_id psql -U postgres -c "grant postgres to portal_db_reader;"
 
+  newlines
+  echo "Running portal migrations"
   cd ../../portal2
   docker run --rm \
     -v ./migrations:/migrations \
@@ -64,6 +85,7 @@ if [ "$1" = "portal" ]; then
     -path /migrations \
     up
 
+  newlines
   echo "Importing portal institutions"
   cd ./src/scripts
   rm -rf .venv
@@ -71,9 +93,10 @@ if [ "$1" = "portal" ]; then
   uv venv .venv
   source .venv/bin/activate
   uv pip install psycopg2-binary
-  python import_grid_institutions.py --host localhost --user portal_db_reader --database portal grid.csv
+  python import_grid_institutions.py --host localhost --user portal_db_reader --database portal --password admin grid.csv
   deactivate
 
+  newlines
   echo "Importing portal metadata"
   cd ../../../portal2-db
   cd sqls
@@ -83,7 +106,7 @@ if [ "$1" = "portal" ]; then
 
   cd ../../portal2
 
-  echo "Will start portal app. To finish the setup, please register users with usernames: test_user1, test_user2"
+  echo "Will start portal app."
   echo "Please use this script with care. Calling it again will drop all changes and start the setup from scratch."
   echo "If you stop this run, then go to portal2 directory. There run <npm run dev>."
   npm run dev

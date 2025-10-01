@@ -12,13 +12,16 @@ Run `./run-tests.sh <service> <client-secret>`. Where:
 
 The script will:
 
-- setup the database for the chosen service as well as for Keycloak.
-- setup the 2 de-register services present in this repository and start them:
+- deploy the database for the chosen service as well as for Keycloak.
+- build the 2 de-register services present in this repository and deploy them:
 api-service, event-listener.
-- additionally, the Java Application script will create a testing realm, a client for the
-service, testing users and an LDAP User federation based on the configuration file.
-- will start the configured service.
-- additional manual steps may still be required. These will be prompted at the end of the script.
+- additionally, the Java Application script will create based on the config file:
+  - create a testing realm 
+  - a client for the service
+  - testing users 
+  - LDAP User federation + specific mappers
+  - Keycloak testing IDP (Github)
+- will start the configured CyVerse service. (e.g. user portal)
 
 ## Structure
 
