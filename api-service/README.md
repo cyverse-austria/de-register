@@ -71,10 +71,10 @@ The Dockerfile is based on the Dockerfile of this repository https://github.com/
 about iRODS workflows there.
 
 ## Logs
-<img width="1785" height="159" alt="image" src="https://github.com/user-attachments/assets/00c492f7-7028-4450-81a0-388fdb28db09" />
-Logs captured from Keycloak container.
+Audit logs for api-service are enabled with this plugin: https://javalin.io/plugins/devlogging.
+Logs are configured in _resources/simplelogger.properties_. Choose there your desired log level.
 
-Note: Because a session LOGIN with Keycloak triggers **2 events**, the API will log (for a successful first login) a first batch of logs that will showcase the OK flow and a second batch that will display the CONFLICT flow (resource already exists) because the user was already added in during the first event trigger.
+In Keycloak, look for "_Event triggered login-listener_" log to check that the plugin is working as expected.
 
 ## Swagger and ReDoc
 The API comes with [Swagger](https://swagger.io/) and [API documentation](https://swagger.io/blog/api-development/redoc-openapi-powered-documentation/) integrated. Once running, visit _http://<your_api_host>/swagger_ or _http://<your_api_host>/redoc_
