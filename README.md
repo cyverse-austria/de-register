@@ -13,11 +13,27 @@ For now a basic script that sets up all services needed to locally test this ser
 
 ## Flow
 
-<img width="747" height="491" alt="flow2 drawio" src="https://github.com/user-attachments/assets/2ebb1908-b310-4c5f-9c7f-ce6137b44896" />
+<img width="552" height="501" alt="flow2 drawio(1)" src="https://github.com/user-attachments/assets/5424e8e3-6d4c-4842-84a7-c6a41b42be06" />
 
-A simple diagram that illustrates the basic flow of data for a CyVerse service login flow using this service.
+A diagram that illustrates the basic flow of data for a CyVerse service login flow using this service.
 
-Because of the way Keycloak sessions work, creating the LDAP account **might not be sufficient** for the CyVerse service to work properly. To address this, make sure to have these setups in your Keycloak LDAP User federation:
+**Example usecase**:
+1. User tries to login in CyVerse User portal
+2. Redirect to Keycloak -> Login through SSO
+3. LDAP Account with only basic attributes is created automatically by Keycloak. In Keycloak the LDAP Account and IDP are now linked
+4. Event-listener is triggered -> actions are sent via HTTP to api-service
+5. Api-service does the following
+    - updates the newly created LDAP account with CyVerse specific attributes
+    - creates new iRODS user
+    - sends HTTP request to CyVerse User portal to create the CyVerse User in the database
+6. Once the user is in the CyVerse database, the home page should appear
+7. The user gets the Welcome email from CyVerse. In the email there is a link used to set a password.
+8. CyVerse user portal sets the password chosen by the user to LDAP and iRODS
+9. Now user has the account from SSO linked to all the needed user storages in CyVerse
+
+
+## Keycloak LDAP User Federation configuration
+The IDP and LDAP Account need to be linked. The way to achieve this is to configure Keycloak LDAP to **WRITABLE** and some extra steps:
 
 Keycloak instance -> your working realm -> User Federation -> Ldap
 - Edit mode: **WRITABLE**
@@ -30,8 +46,7 @@ Ldap -> Mappers
 <img width="1856" height="874" alt="image" src="https://github.com/user-attachments/assets/4ad307c1-9018-4c59-a4a4-3ad67e8ef453" />
 
 - mappers **first name** and **last name**: 
-   - READ-ONLY **OFF**
    - Always Read Value from LDAP **OFF**
-     <img width="738" height="200" alt="image" src="https://github.com/user-attachments/assets/e001d17b-3d9a-477d-8c43-374d6b465fee" />
+    <img width="518" height="133" alt="image" src="https://github.com/user-attachments/assets/7ae24126-5fa5-41de-8f09-d627ed2d382d" />
 
   This will force the **event-listener** to capture the User data coming from SSO session, otherwise first name and last name would be empty, because Keycloak expects to read them from LDAP storage, but WRITABLE option does not automatically write them.
