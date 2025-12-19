@@ -30,10 +30,11 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
     private LdapService ldapService;
     private IrodsService irodsService;
     private UserPortalService userPortalService;
+    private String clientId;
 
     @Override
     public EventListenerProvider create(KeycloakSession session) {
-        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService);
+        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService, clientId);
     }
 
     private boolean testConnection(ListenerHttpClientBase httpClient) {
@@ -82,6 +83,8 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
             ldapService = new NoOpLdapServiceImpl();
             userPortalService = new NoOpUserPortalServiceImpl();
         }
+
+        clientId = config.get("client-id");
     }
 
     @Override
