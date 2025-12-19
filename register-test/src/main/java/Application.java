@@ -184,6 +184,7 @@ public class Application {
         ClientRepresentation client = new ClientRepresentation();
         client.setClientId(name);
         String baseURL = "http://127.0.0.1:" + port;
+        client.setPublicClient(true);
         client.setRootUrl(baseURL);
         client.setAdminUrl(baseURL);
         client.setWebOrigins(List.of(baseURL));
