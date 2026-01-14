@@ -12,7 +12,12 @@ Then, use the container to extract the jar inside _/opt/keycloak/providers/_ dir
 plugin JAR available at that path will make this flow work as expected.
 
 Make sure to set this environment variable for the keycloak container: 
-```KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_API_SERVICE_HOST: <URL_OF_API_SERVICE>```.
+```KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_API_SERVICE_HOST: <URL_OF_API_SERVICE>```
+
+### Extra config options
+Set allowed Keycloak clients to trigger the event-listener. Add one or more clients separated by **,**. If option is not set, then all clients will
+trigger the plugin at LOGIN events.
+```KC_SPI_EVENTS_LISTENER_LOGIN_LISTENER_CLIENT_ID: <client1>,<client2>```
 
 ## Authentication
 The API service has authentication implemented. To successfully login with the event-listener in the api-service, make sure to configure these
