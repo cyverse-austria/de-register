@@ -91,7 +91,7 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
 
         String clientIdsCfgVal= config.get("client-ids");
         if (!Strings.isNullOrEmpty(clientIdsCfgVal)) {
-            clientIds = Arrays.stream(config.get("client-ids").split(",")).toList();
+            clientIds = Arrays.stream(clientIdsCfgVal.split(",")).toList();
         } else {
             clientIds = List.of();
         }
