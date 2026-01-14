@@ -1,4 +1,5 @@
 package com.cyverse.keycloak;
+
 import com.cyverse.keycloak.http.ListenerHttpClientBase;
 import com.cyverse.keycloak.http.ListenerHttpClientWAuth;
 import com.cyverse.keycloak.http.ListenerHttpClientWoAuth;
@@ -7,11 +8,12 @@ import com.cyverse.keycloak.irods.service.IrodsService;
 import com.cyverse.keycloak.irods.service.IrodsServiceImpl;
 import com.cyverse.keycloak.irods.service.NoOpIrodsServiceImpl;
 import com.cyverse.keycloak.ldap.service.LdapService;
+import com.cyverse.keycloak.ldap.service.LdapServiceImpl;
+import com.cyverse.keycloak.ldap.service.NoOpLdapServiceImpl;
 import com.cyverse.keycloak.portal.service.NoOpUserPortalServiceImpl;
 import com.cyverse.keycloak.portal.service.UserPortalService;
 import com.cyverse.keycloak.portal.service.UserPortalServiceImpl;
-import com.cyverse.keycloak.ldap.service.LdapServiceImpl;
-import com.cyverse.keycloak.ldap.service.NoOpLdapServiceImpl;
+import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -19,6 +21,9 @@ import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventListenerProviderFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Factory for Keycloak event-listener.
@@ -30,11 +35,11 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
     private LdapService ldapService;
     private IrodsService irodsService;
     private UserPortalService userPortalService;
-    private String clientId;
+    private List<String> clientIds;
 
     @Override
     public EventListenerProvider create(KeycloakSession session) {
-        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService, clientId);
+        return new KeycloakLoginListener(session, ldapService, irodsService, userPortalService, clientIds);
     }
 
     private boolean testConnection(ListenerHttpClientBase httpClient) {
@@ -84,7 +89,12 @@ public class KeycloakLoginListenerFactory implements EventListenerProviderFactor
             userPortalService = new NoOpUserPortalServiceImpl();
         }
 
-        clientId = config.get("client-id");
+        String clientIdsCfgVal= config.get("client-ids");
+        if (!Strings.isNullOrEmpty(clientIdsCfgVal)) {
+            clientIds = Arrays.stream(config.get("client-ids").split(",")).toList();
+        } else {
+            clientIds = List.of();
+        }
     }
 
     @Override

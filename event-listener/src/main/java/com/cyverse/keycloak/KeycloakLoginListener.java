@@ -15,9 +15,8 @@ import org.keycloak.models.UserModel;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,19 +31,19 @@ public class KeycloakLoginListener implements EventListenerProvider {
     private final LdapService ldapService;
     private final IrodsService irodsService;
     private final UserPortalService userPortalService;
-    private final String clientId;
+    private final List<String> clientIds;
     private final Map<String, Instant> minTimeBetweenLogins;
 
     public KeycloakLoginListener(KeycloakSession session,
                                  LdapService ldapService,
                                  IrodsService irodsService,
                                  UserPortalService userPortalService,
-                                 String clientId) {
+                                 List<String> clientIds) {
         this.session = session;
         this.ldapService = ldapService;
         this.irodsService = irodsService;
         this.userPortalService = userPortalService;
-        this.clientId = clientId;
+        this.clientIds = clientIds;
         this.minTimeBetweenLogins = new ConcurrentHashMap<>();
     }
 
@@ -104,7 +103,8 @@ public class KeycloakLoginListener implements EventListenerProvider {
     @Override
     public void onEvent(Event event) {
         if (!event.getType().equals(EventType.LOGIN)
-                || !Objects.equals(event.getClientId(), this.clientId)) {
+                || (!this.clientIds.isEmpty() && this.clientIds.stream()
+                    .noneMatch(c -> c.equals(event.getClientId())))) {
             return;
         }
 
