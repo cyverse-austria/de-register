@@ -117,7 +117,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
                 && canTriggerActions(user)) {
             performLdapActions(user);
             performIrodsActions(user);
-            performUserPortalActions(user);
+           // performUserPortalActions(user);
         }
     }
 
