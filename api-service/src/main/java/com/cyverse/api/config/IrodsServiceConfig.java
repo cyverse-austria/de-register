@@ -1,9 +1,11 @@
 package com.cyverse.api.config;
 
 import com.cyverse.api.exceptions.ConfigException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class IrodsServiceConfig implements GenericConfig {
     private String password;
     private String zone;
@@ -22,5 +24,13 @@ public class IrodsServiceConfig implements GenericConfig {
         if (ipcServices == null) {
             ipcServices = false;
         }
+    }
+
+    public static IrodsServiceConfig fromEnv(String prefix) {
+        return new IrodsServiceConfig(
+                System.getenv(prefix + "IRODS_PASSWORD"),
+                System.getenv(prefix+ "IRODS_ZONE"),
+                Boolean.valueOf(System.getenv(prefix+"IRODS_IPC_SERVICES"))
+        );
     }
 }
