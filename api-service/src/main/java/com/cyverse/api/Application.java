@@ -28,6 +28,7 @@ import static io.javalin.http.Header.AUTHORIZATION;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static final String ENV_PREFIX = "API_SERVICE_";
 
     public static void main(String[] args) {
         ApiServiceConfig appConfig = null;
@@ -123,6 +124,9 @@ public class Application {
     }
 
     private static ApiServiceConfig loadConfig(String filePath) throws Exception {
+        if (filePath.equals("--from-env")) {
+            return ApiServiceConfig.fromEnv(ENV_PREFIX);
+        }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         return mapper.readValue(new File(filePath), ApiServiceConfig.class);
     }

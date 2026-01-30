@@ -1,9 +1,11 @@
 package com.cyverse.api.config;
 
 import com.cyverse.api.exceptions.ConfigException;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class ApiServiceConfig implements GenericConfig {
     private Integer port;
     private IrodsServiceConfig irodsServiceConfig;
@@ -34,5 +36,15 @@ public class ApiServiceConfig implements GenericConfig {
         irodsServiceConfig.verifyFieldsAreSet();
         ldapServiceConfig.verifyFieldsAreSet();
         userPortalServiceConfig.verifyFieldsAreSet();
+    }
+
+    public static ApiServiceConfig fromEnv(String prefix) {
+        return new ApiServiceConfig(
+                Integer.valueOf(System.getenv(prefix + "PORT")),
+                IrodsServiceConfig.fromEnv(prefix),
+                LdapServiceConfig.fromEnv(prefix),
+                AuthConfig.fromEnv(prefix),
+                UserPortalServiceConfig.fromEnv(prefix)
+        );
     }
 }
