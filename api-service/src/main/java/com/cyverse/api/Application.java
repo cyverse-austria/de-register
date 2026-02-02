@@ -1,6 +1,7 @@
 package com.cyverse.api;
 
 import com.cyverse.api.config.ApiServiceConfig;
+import com.cyverse.api.config.EnvHelper;
 import com.cyverse.api.controllers.*;
 import com.cyverse.api.exceptions.ExceptionHandler;
 import com.cyverse.api.exceptions.UnauthorizedAccessException;
@@ -32,8 +33,9 @@ public class Application {
 
     public static void main(String[] args) {
         ApiServiceConfig appConfig = null;
+        EnvHelper envHelper = new EnvHelper();
         try {
-            appConfig = loadConfig(args[0]);
+            appConfig = loadConfig(args[0], envHelper);
             appConfig.verifyFieldsAreSet();
         } catch (Exception e) {
             logger.error("Config could not be loaded. {}", e.getMessage());
@@ -54,7 +56,7 @@ public class Application {
                 .start(appConfig.getPort());
 
         try {
-            initControllers(app, appConfig);
+            initControllers(app, appConfig, envHelper);
         } catch (Exception e) {
             logger.error("Error at initialization: {}", e.getMessage());
             System.exit(1);
@@ -64,7 +66,7 @@ public class Application {
         logger.info("API started.");
     }
 
-    private static void initControllers(Javalin app, ApiServiceConfig appConfig) {
+    private static void initControllers(Javalin app, ApiServiceConfig appConfig, EnvHelper envHelper) {
         logger.info("Initializing controllers");
         HealthController healthController = new HealthController();
         app.get("/", healthController::getHealthy);
@@ -85,7 +87,7 @@ public class Application {
         if (appConfig.getAuthConfig() != null) {
             AuthService authService = new AuthService(
                     appConfig.getAuthConfig().getTokenIssuer(),
-                    appConfig.getAuthConfig().getUsers());
+                    appConfig.getAuthConfig().getUsers(), envHelper);
             authService.init();
 
             AuthController authController = new AuthController(
@@ -123,9 +125,9 @@ public class Application {
         // app.post("/api/users/portal", userPortalController::addUserPortalUser);
     }
 
-    private static ApiServiceConfig loadConfig(String filePath) throws Exception {
+    private static ApiServiceConfig loadConfig(String filePath, EnvHelper envHelper) throws Exception {
         if (filePath.equals("--from-env")) {
-            return ApiServiceConfig.fromEnv(ENV_PREFIX);
+            return ApiServiceConfig.fromEnv(envHelper, ENV_PREFIX);
         }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         return mapper.readValue(new File(filePath), ApiServiceConfig.class);

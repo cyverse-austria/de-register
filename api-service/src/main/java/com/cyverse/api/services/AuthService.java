@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.cyverse.api.config.AuthUserConfig;
+import com.cyverse.api.config.EnvHelper;
 import com.cyverse.api.exceptions.ApiTokenExpiredException;
 import com.cyverse.api.exceptions.UnauthorizedAccessException;
 
@@ -21,17 +22,19 @@ public class AuthService {
     private final Map<String, AuthUserConfig> users;
     private final String tokenIssuer;
     private Algorithm algorithm;
+    private EnvHelper envHelper;
     private static final String AUTH_SECRET = "AUTH_SECRET";
 
     public static final long EXPIRES_IN_MS = 3600000L;
 
-    public AuthService(String tokenIssuer, Map<String, AuthUserConfig> users) {
+    public AuthService(String tokenIssuer, Map<String, AuthUserConfig> users, EnvHelper envHelper) {
         this.tokenIssuer = tokenIssuer;
         this.users = users;
+        this.envHelper = envHelper;
     }
 
     public void init() {
-        String secret = System.getenv(AUTH_SECRET);
+        String secret = this.envHelper.getEnv(AUTH_SECRET);
         algorithm = Algorithm.HMAC256(secret);
     }
 
