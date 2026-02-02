@@ -41,8 +41,15 @@ public class ApiServiceConfig implements GenericConfig {
     }
 
     public static ApiServiceConfig fromEnv(EnvHelper envHelper, String prefix) {
+        Integer portEnv;
+        try {
+            portEnv = Integer.valueOf(envHelper.getEnv(prefix + "PORT"));
+        } catch (Exception e) {
+            portEnv = null;
+        }
+
         return new ApiServiceConfig(
-                Integer.valueOf(envHelper.getEnv(prefix + "PORT")),
+                portEnv,
                 IrodsServiceConfig.fromEnv(envHelper, prefix),
                 LdapServiceConfig.fromEnv(envHelper, prefix),
                 AuthConfig.fromEnv(envHelper, prefix),
