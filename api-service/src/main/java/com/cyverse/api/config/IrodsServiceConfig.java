@@ -3,9 +3,11 @@ package com.cyverse.api.config;
 import com.cyverse.api.exceptions.ConfigException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class IrodsServiceConfig implements GenericConfig {
     private String password;
     private String zone;
@@ -26,11 +28,11 @@ public class IrodsServiceConfig implements GenericConfig {
         }
     }
 
-    public static IrodsServiceConfig fromEnv(String prefix) {
+    public static IrodsServiceConfig fromEnv(EnvHelper envHelper, String prefix) {
         return new IrodsServiceConfig(
-                System.getenv(prefix + "IRODS_PASSWORD"),
-                System.getenv(prefix+ "IRODS_ZONE"),
-                Boolean.valueOf(System.getenv(prefix+"IRODS_IPC_SERVICES"))
+                envHelper.getEnv(prefix + "IRODS_PASSWORD"),
+                envHelper.getEnv(prefix+ "IRODS_ZONE"),
+                Boolean.valueOf(envHelper.getEnv(prefix+"IRODS_IPC_SERVICES"))
         );
     }
 }

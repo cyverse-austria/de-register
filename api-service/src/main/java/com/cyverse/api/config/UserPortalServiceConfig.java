@@ -3,9 +3,11 @@ package com.cyverse.api.config;
 import com.cyverse.api.exceptions.ConfigException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserPortalServiceConfig implements GenericConfig {
     private String host;
     private String hmacKey;
@@ -20,11 +22,11 @@ public class UserPortalServiceConfig implements GenericConfig {
         }
     }
 
-    public static UserPortalServiceConfig fromEnv(String prefix) {
+    public static UserPortalServiceConfig fromEnv(EnvHelper envHelper, String prefix) {
         return new UserPortalServiceConfig(
-                System.getenv(prefix + "PORTAL_HOST"),
-                System.getenv(prefix+ "PORTAL_HMAC_KEY"),
-                Integer.valueOf(System.getenv(prefix+"PORTAL_DIVISOR"))
+                envHelper.getEnv(prefix + "PORTAL_HOST"),
+                envHelper.getEnv(prefix+ "PORTAL_HMAC_KEY"),
+                Integer.valueOf(envHelper.getEnv(prefix+"PORTAL_DIVISOR"))
         );
     }
 }

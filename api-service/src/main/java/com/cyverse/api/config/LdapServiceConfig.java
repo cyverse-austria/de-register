@@ -3,6 +3,7 @@ package com.cyverse.api.config;
 import com.cyverse.api.exceptions.ConfigException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class LdapServiceConfig implements GenericConfig {
     private String host;
     private String admin;
@@ -32,13 +34,13 @@ public class LdapServiceConfig implements GenericConfig {
         }
     }
 
-    public static LdapServiceConfig fromEnv(String prefix) {
+    public static LdapServiceConfig fromEnv(EnvHelper envHelper, String prefix) {
         return new LdapServiceConfig(
-                System.getenv(prefix + "LDAP_HOST"),
-                System.getenv(prefix + "LDAP_ADMIN"),
-                System.getenv(prefix + "LDAP_PASSWORD"),
-                System.getenv(prefix + "LDAP_BASE_DN"),
-                System.getenv(prefix + "LDAP_EVERYONE_GROUP")
+                envHelper.getEnv(prefix + "LDAP_HOST"),
+                envHelper.getEnv(prefix + "LDAP_ADMIN"),
+                envHelper.getEnv(prefix + "LDAP_PASSWORD"),
+                envHelper.getEnv(prefix + "LDAP_BASE_DN"),
+                envHelper.getEnv(prefix + "LDAP_EVERYONE_GROUP")
         );
     }
 }
