@@ -30,7 +30,7 @@ public class ApplicationTest {
 
     @Test
     void testAppStart() {
-        String configFile = "./app-test-file.yaml";
+        String configFile = "./app-test-no-auth.yaml";
         String path = Objects.requireNonNull(getClass().getClassLoader().getResource(configFile)).getPath();
 
         Assertions.assertDoesNotThrow(() -> Application.main(new String[]{path}));

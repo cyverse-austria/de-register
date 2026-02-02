@@ -1,0 +1,15 @@
+port: 7000
+irodsServiceConfig:
+  password: "test"
+  zone: "TUG"
+  ipcServices: false
+ldapServiceConfig:
+  host: "ldap://192.168.31.115:389/"
+  admin: "cn=Manager,dc=example,dc=org"
+  password: "notreal"
+  baseDN: "dc=example,dc=org"
+  everyoneGroup: "everyone"
+userPortalServiceConfig:
+  host: http://192.168.31.115:3000
+  hmacKey: <SECRET>
+  divisor: 7
