@@ -121,8 +121,8 @@ public class Application {
         app.put("/api/groups/ldap", ldapController::addLdapUserToGroup);
         app.put("/api/groups/ldap/password", ldapController::addPasswordToLdapUser);
 
-        // UserPortalController userPortalController = new UserPortalController(userPortalService);
-        // app.post("/api/users/portal", userPortalController::addUserPortalUser);
+        UserPortalController userPortalController = new UserPortalController(userPortalService);
+        app.post("/api/users/portal", userPortalController::addUserPortalUser);
     }
 
     private static ApiServiceConfig loadConfig(String filePath, EnvHelper envHelper) throws Exception {

@@ -13,10 +13,7 @@ import javax.naming.directory.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * LDAP service based on javax.naming library.
@@ -179,6 +176,27 @@ public class LdapService {
         }
     }
 
+    /**
+     * Adds user to LDAP, if it does not already exist.
+     *
+     * @param user the user to register in LDAP
+     */
+    public Map<String, String> getLdapUserAttributes(UserModel user)
+            throws NamingException {
+        String username = user.getUsername();
+        logger.debug("Try getting user attributes from LDAP: {}", username);
+        String entryDN = "uid=" + username +",ou=People," + ldapConfig.getBaseDN();
+
+        DirContext ctx = new InitialDirContext(env);
+
+        Map<String, String> attrs = new HashMap<>();
+        attrs.put("LDAP_ENTRY_DN", entryDN);
+        attrs.put("modifyTimestamp", getLdapUserAttr(ctx, "modifyTimestamp", username).orElse(""));
+        attrs.put("createTimestamp", getLdapUserAttr(ctx, "createTimestamp", username).orElse(""));
+        attrs.put("LDAP_ID", getLdapUserAttr(ctx, "entryUUID", username).orElse(""));
+        return attrs;
+    }
+
     protected void addEntryDN(String entryDN, Attributes attrs) throws NamingException {
         DirContext ctx = new InitialDirContext(env);
         // TODO custom exception with message for empty optional
@@ -284,5 +302,29 @@ public class LdapService {
         attrs.put("o", "Graz University of Technology");
 
         return attrs;
+    }
+
+    /**
+     * Get an LDAP attribute for a user.
+     * @return Optional string attribute
+     */
+    private Optional<String> getLdapUserAttr(DirContext ctx, String attr, String username) {
+        String searchFilter = "(uid=" + username + ")";
+
+        try {
+            SearchControls searchControls = new SearchControls();
+            searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            searchControls.setReturningAttributes(new String[]{attr});
+
+            NamingEnumeration<SearchResult> results =
+                    ctx.search(ldapConfig.getBaseDN(), searchFilter, searchControls);
+
+            SearchResult result = results.next();
+            Attributes attrs = result.getAttributes();
+            return Optional.of(String.valueOf(attrs.get(attr).get()));
+        } catch (NamingException e) {
+            logger.error("Error searching attribute: {}", e.getMessage());
+        }
+        return Optional.empty();
     }
 }
