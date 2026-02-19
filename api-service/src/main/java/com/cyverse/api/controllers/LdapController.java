@@ -10,6 +10,7 @@ import io.javalin.openapi.*;
 
 import javax.naming.NamingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 public class LdapController {
 
@@ -36,7 +37,9 @@ public class LdapController {
         UserModel user = ctx.bodyAsClass(UserModel.class);
         user.validateUsername();
         ldapService.addLdapUser(user);
+        Map<String, String> userAttrs = ldapService.getLdapUserAttributes(user);
         ctx.status(HttpStatus.CREATED);
+        ctx.json(userAttrs);
     }
 
     @OpenApi(

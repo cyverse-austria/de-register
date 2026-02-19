@@ -48,7 +48,8 @@ public class KeycloakLoginListener implements EventListenerProvider {
     }
 
     private void performLdapActions(UserModel user) {
-        ldapService.updateLdapUser(user);
+        Map<String, String> ldapAttrs = ldapService.updateLdapUser(user);
+        ldapAttrs.forEach(user::setSingleAttribute);
         // generic groups for all users
         ldapService.addLdapUserToGroup(user, "everyone");
         ldapService.addLdapUserToGroup(user, "community");

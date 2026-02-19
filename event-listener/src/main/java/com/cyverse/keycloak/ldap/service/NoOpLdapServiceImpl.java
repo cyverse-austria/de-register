@@ -3,12 +3,16 @@ package com.cyverse.keycloak.ldap.service;
 import org.jboss.logging.Logger;
 import org.keycloak.models.UserModel;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class NoOpLdapServiceImpl implements LdapService {
     private static final Logger logger = Logger.getLogger(NoOpLdapServiceImpl.class);
 
     @Override
-    public void updateLdapUser(UserModel user) {
+    public Map<String, String> updateLdapUser(UserModel user) {
         logger.error("No operation possible. Check other dependencies for failures.");
+        return new HashMap<>();
     }
 
     @Override

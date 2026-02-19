@@ -10,6 +10,7 @@ import org.keycloak.models.UserModel;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,7 +33,7 @@ public class LdapServiceImpl implements LdapService {
      * @param user the UserModel that comes from Keycloak data-model
      */
     @Override
-    public void updateLdapUser(UserModel user) {
+    public Map<String, String> updateLdapUser(UserModel user) {
         logger.debug("Try adding user to LDAP: " + user.getUsername());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -59,11 +60,15 @@ public class LdapServiceImpl implements LdapService {
             } else {
                 logger.warn(response.body());
             }
+
+            return mapper.readValue(response.body(), Map.class);
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
         } catch (IOException | InterruptedException httpExc) {
             logger.error("Got exception from HTTP request to API client: " + httpExc.getMessage());
         }
+
+        return new HashMap<>();
     }
 
     /**
