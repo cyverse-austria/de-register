@@ -13,7 +13,7 @@ For now a basic script that sets up all services needed to locally test this ser
 
 ## Flow
 
-<img width="552" height="501" alt="flow2 drawio(1)" src="https://github.com/user-attachments/assets/5424e8e3-6d4c-4842-84a7-c6a41b42be06" />
+![diagram](./static/diagram.png)
 
 A diagram that illustrates the basic flow of data for a CyVerse service login flow using this service.
 
@@ -36,10 +36,10 @@ Because we want to keep **LDAP Edit Mode: READ_ONLY**, syncing newly created LDA
 All **new** accounts **won't have an issue** logging in because de-register handles every setup required for CyVerse registration, but existing accounts
 that are already federated through LDAP can be a problem with the normal **first broken login flow**. If we want to avoid the extra verification step in this case, that prompts the user to add its LDAP credentials, we must create a new login flow, as the one in the image:
 
-<img width="1929" height="1192" alt="image" src="https://github.com/user-attachments/assets/e60d1397-bc07-4b23-891b-a85336b11063" />
+![custom-flow](./static/custom-flow.png)
 
 Then choose this in your identity provider setup:
 
-<img width="1888" height="374" alt="image" src="https://github.com/user-attachments/assets/c346f26b-005b-42a6-b56d-57701c494bdf" />
+![idp-flow](./static/idp-flow.png)
 
 With this in place, when the user that already has an LDAP account in Keycloak tries to authenticate with SSO + de-register, Keycloak will just choose the already existing LDAP account without any extra step.
