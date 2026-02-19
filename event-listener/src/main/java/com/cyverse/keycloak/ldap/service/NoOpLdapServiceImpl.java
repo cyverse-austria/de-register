@@ -10,7 +10,7 @@ public class NoOpLdapServiceImpl implements LdapService {
     private static final Logger logger = Logger.getLogger(NoOpLdapServiceImpl.class);
 
     @Override
-    public Map<String, String> updateLdapUser(UserModel user) {
+    public Map<String, String> addLdapUser(UserModel user) {
         logger.error("No operation possible. Check other dependencies for failures.");
         return new HashMap<>();
     }
