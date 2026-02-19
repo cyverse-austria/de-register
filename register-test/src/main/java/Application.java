@@ -144,9 +144,9 @@ public class Application {
         MultivaluedHashMap<String, String> ldapParams = new MultivaluedHashMap<>();
         ldapParams.put("enabled", List.of("true"));
         ldapParams.put("priority", List.of("0"));
-        ldapParams.put("editMode", List.of("WRITABLE"));
+        ldapParams.put("editMode", List.of("READ_ONLY"));
         ldapParams.put("importEnabled", List.of("true"));
-        ldapParams.put("syncRegistrations", List.of("true"));
+        ldapParams.put("syncRegistrations", List.of("false"));
         ldapParams.put("vendor", List.of("other"));
         ldapParams.put("usernameLDAPAttribute", List.of("uid"));
         ldapParams.put("rdnLDAPAttribute", List.of("uid"));
