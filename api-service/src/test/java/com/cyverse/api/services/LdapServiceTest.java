@@ -14,8 +14,11 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -168,6 +171,26 @@ public class LdapServiceTest {
                         mods[0].getAttribute().contains("test_user")));
 
         assertThrows(ResourceAlreadyExistsException.class, () -> ldapService.addLdapUserToGroup(testUser, group));
+    }
+
+    @Test
+    void testGetLdapUserAttrs() throws NamingException {
+        UserModel user = new UserModel();
+        user.setUsername("test_user");
+        user.setEmail("test_user@test.com");
+        user.setFirstName("test");
+        user.setLastName("user");;
+
+        doReturn("dc=example,dc=org").when(config).getBaseDN();
+
+        Map<String, String> expectedAttrs = Map.of(
+                "LDAP_ENTRY_DN", "uid=test_user,ou=People,dc=example,dc=org",
+                "modifyTimestamp", "",
+                "createTimestamp", "",
+                "LDAP_ID", ""
+                );
+
+        assertEquals(expectedAttrs, ldapService.getLdapUserAttributes(user));
     }
 
     private boolean sameMods(ModificationItem[] items1, ModificationItem[] items2) throws NamingException {
