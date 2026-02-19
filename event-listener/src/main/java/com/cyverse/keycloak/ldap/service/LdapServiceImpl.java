@@ -49,7 +49,7 @@ public class LdapServiceImpl implements LdapService {
             HttpResponse<String> response =
                     httpClient.getHttpClient()
                             .send(httpClient
-                                            .getRequestPUT(LDAP_USERS_ENDPOINT, jsonBody),
+                                            .getRequestPOST(LDAP_USERS_ENDPOINT, jsonBody),
                                     HttpResponse.BodyHandlers.ofString());
 
             logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
