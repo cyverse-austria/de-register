@@ -57,18 +57,18 @@ public class LdapServiceImpl implements LdapService {
 
             if (response.statusCode() == HttpStatus.SC_OK) {
                 logger.info("Successfully updated user " + user.getUsername() + " in LDAP");
+                return mapper.readValue(response.body(), Map.class);
             } else {
                 logger.warn(response.body());
+                return null;
             }
-
-            return mapper.readValue(response.body(), Map.class);
         } catch (JsonProcessingException jsonExc) {
             logger.error("Got exception trying to build API client body data: " + user.getUsername() + "\n" + jsonExc.getMessage());
         } catch (IOException | InterruptedException httpExc) {
             logger.error("Got exception from HTTP request to API client: " + httpExc.getMessage());
         }
 
-        return new HashMap<>();
+        return null;
     }
 
     /**

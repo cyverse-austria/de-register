@@ -9,6 +9,7 @@ import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;
 import org.keycloak.events.EventType;
 import org.keycloak.events.admin.AdminEvent;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -47,12 +48,26 @@ public class KeycloakLoginListener implements EventListenerProvider {
         this.minTimeBetweenLogins = new ConcurrentHashMap<>();
     }
 
-    private void performLdapActions(UserModel user) {
+    private void performLdapActions(UserModel user, RealmModel realm) {
         Map<String, String> ldapAttrs = ldapService.updateLdapUser(user);
-        ldapAttrs.forEach(user::setSingleAttribute);
+        if (ldapAttrs != null) {
+            ldapAttrs.forEach(user::setSingleAttribute);
+        }
         // generic groups for all users
         ldapService.addLdapUserToGroup(user, "everyone");
         ldapService.addLdapUserToGroup(user, "community");
+
+        GroupModel groupEveryone = realm.getGroupsStream()
+                .filter(g -> g.getName().equals("everyone"))
+                .findFirst()
+                .orElse(null);
+        GroupModel groupCommunity = realm.getGroupsStream()
+                .filter(g -> g.getName().equals("community"))
+                .findFirst()
+                .orElse(null);
+
+        user.joinGroup(groupEveryone);
+        user.joinGroup(groupCommunity);
 
         // TODO add to discovery-environment specific group "de-preview-access" ?
         // see https://github.com/cyverse-de/portal2/blob/fcfecdfac381761d743fb4a312a6e779eec4397f/src/api/workflows/native/services.js#L23
@@ -116,7 +131,7 @@ public class KeycloakLoginListener implements EventListenerProvider {
         if (user != null
                 && !sessionRealm.getName().contains("master")
                 && canTriggerActions(user)) {
-            performLdapActions(user);
+            performLdapActions(user, sessionRealm);
             performIrodsActions(user);
            // performUserPortalActions(user);
         }
