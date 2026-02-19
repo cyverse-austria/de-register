@@ -33,7 +33,7 @@ public class LdapServiceImpl implements LdapService {
      * @param user the UserModel that comes from Keycloak data-model
      */
     @Override
-    public Map<String, String> updateLdapUser(UserModel user) {
+    public Map<String, String> addLdapUser(UserModel user) {
         logger.debug("Try adding user to LDAP: " + user.getUsername());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -55,8 +55,8 @@ public class LdapServiceImpl implements LdapService {
 
             logger.debug("API RESPONSE STATUS CODE: " + response.statusCode());
 
-            if (response.statusCode() == HttpStatus.SC_OK) {
-                logger.info("Successfully updated user " + user.getUsername() + " in LDAP");
+            if (response.statusCode() == HttpStatus.SC_CREATED) {
+                logger.info("Successfully added user " + user.getUsername() + " in LDAP");
                 return mapper.readValue(response.body(), Map.class);
             } else {
                 logger.warn(response.body());

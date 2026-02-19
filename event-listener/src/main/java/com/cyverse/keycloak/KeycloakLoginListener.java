@@ -49,14 +49,18 @@ public class KeycloakLoginListener implements EventListenerProvider {
     }
 
     private void performLdapActions(UserModel user, RealmModel realm) {
-        Map<String, String> ldapAttrs = ldapService.updateLdapUser(user);
+        Map<String, String> ldapAttrs = ldapService.addLdapUser(user);
+
+        // set attributes in Keycloak
         if (ldapAttrs != null) {
             ldapAttrs.forEach(user::setSingleAttribute);
         }
-        // generic groups for all users
+
+        // add user to generic groups in LDAP
         ldapService.addLdapUserToGroup(user, "everyone");
         ldapService.addLdapUserToGroup(user, "community");
 
+        // add user to groups in Keycloak
         GroupModel groupEveryone = realm.getGroupsStream()
                 .filter(g -> g.getName().equals("everyone"))
                 .findFirst()

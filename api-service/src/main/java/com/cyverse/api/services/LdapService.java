@@ -13,7 +13,12 @@ import javax.naming.directory.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Base64;
+import java.util.Hashtable;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * LDAP service based on javax.naming library.
@@ -177,9 +182,9 @@ public class LdapService {
     }
 
     /**
-     * Adds user to LDAP, if it does not already exist.
+     * Gets specific user attributes from LDAP.
      *
-     * @param user the user to register in LDAP
+     * @param user the user to search the attributes for
      */
     public Map<String, String> getLdapUserAttributes(UserModel user)
             throws NamingException {
