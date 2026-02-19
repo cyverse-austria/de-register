@@ -20,33 +20,26 @@ A diagram that illustrates the basic flow of data for a CyVerse service login fl
 **Example usecase**:
 1. User tries to login in CyVerse User portal
 2. Redirect to Keycloak -> Login through SSO
-3. LDAP Account with only basic attributes is created automatically by Keycloak. In Keycloak the LDAP Account and IDP are now linked
-4. Event-listener is triggered -> actions are sent via HTTP to api-service
-5. Api-service does the following
-    - updates the newly created LDAP account with CyVerse specific attributes
+3. Event-listener is triggered -> actions are sent via HTTP to api-service
+4. Api-service does the following
+    - creates an LDAP account with CyVerse specific attributes
     - creates new iRODS user
     - sends HTTP request to CyVerse User portal to create the CyVerse User in the database
+5. Event-listener sets ldap-specific attributes and add the user to the required groups in Keycloak
 6. Once the user is in the CyVerse database, the home page should appear
 7. The user gets the Welcome email from CyVerse. In the email there is a link used to set a password.
 8. CyVerse user portal sets the password chosen by the user to LDAP and iRODS
 9. Now user has the account from SSO linked to all the needed user storages in CyVerse
 
+## Keycloak custom first broker login flow (SSO Specific)
+Because we want to keep **LDAP Edit Mode: READ_ONLY**, syncing newly created LDAP account with the user coming from SSO proves to be a challenge.
+All **new** accounts **won't have an issue** logging in because de-register handles every setup required for CyVerse registration, but existing accounts
+that are already federated through LDAP can be a problem with the normal **first broken login flow**. If we want to avoid the extra verification step in this case, that prompts the user to add its LDAP credentials, we must create a new login flow, as the one in the image:
 
-## Keycloak LDAP User Federation configuration
-The IDP and LDAP Account need to be linked. The way to achieve this is to configure Keycloak LDAP to **WRITABLE** and some extra steps:
+<img width="1929" height="1192" alt="image" src="https://github.com/user-attachments/assets/e60d1397-bc07-4b23-891b-a85336b11063" />
 
-Keycloak instance -> your working realm -> User Federation -> Ldap
-- Edit mode: **WRITABLE**
-  <img width="1260" height="208" alt="image" src="https://github.com/user-attachments/assets/1e65de6d-1807-4dc5-80c0-34508601a10c" />
-- Sync Registration: **ON**
-  <img width="1165" height="267" alt="image" src="https://github.com/user-attachments/assets/165e66e8-6e67-4cda-bce1-a5fc3344a24d" />
+Then choose this in your identity provider setup:
 
+<img width="1888" height="374" alt="image" src="https://github.com/user-attachments/assets/c346f26b-005b-42a6-b56d-57701c494bdf" />
 
-Ldap -> Mappers
-<img width="1856" height="874" alt="image" src="https://github.com/user-attachments/assets/4ad307c1-9018-4c59-a4a4-3ad67e8ef453" />
-
-- mappers **first name** and **last name**: 
-   - Always Read Value from LDAP **OFF**
-    <img width="518" height="133" alt="image" src="https://github.com/user-attachments/assets/7ae24126-5fa5-41de-8f09-d627ed2d382d" />
-
-  This will force the **event-listener** to capture the User data coming from SSO session, otherwise first name and last name would be empty, because Keycloak expects to read them from LDAP storage, but WRITABLE option does not automatically write them.
+With this in place, when the user that already has an LDAP account in Keycloak tries to authenticate with SSO + de-register, Keycloak will just choose the already existing LDAP account without any extra step.
