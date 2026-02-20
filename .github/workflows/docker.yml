@@ -2,13 +2,15 @@ name: build and push docker image
 
 env:
   REGISTRY: ghcr.io
-  APP_VERSION: 0.0.1
+  APP_VERSION: 0.1.0
   IMAGE_NAME: ${{ github.repository }}
 
 on:
   push:
     branches:
       - main
+    tags:
+      - v*
   workflow_dispatch:
 
 jobs:

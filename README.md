@@ -18,6 +18,9 @@ For now a basic script that sets up all services needed to locally test this ser
 A diagram that illustrates the basic flow of data for a CyVerse service login flow using this service.
 
 **Example usecase**:
+
+**Note:** The steps related to CyVerse User portal are not valid for now.
+
 1. User tries to login in CyVerse User portal
 2. Redirect to Keycloak -> Login through SSO
 3. Event-listener is triggered -> actions are sent via HTTP to api-service
@@ -38,8 +41,13 @@ that are already federated through LDAP can be a problem with the normal **first
 
 ![custom-flow](./static/custom-flow.png)
 
+To easily create this, go to your realm -> Authentication -> first broker login -> duplicate, then choose a name for the copy and follow the flow in the image.
+
 Then choose this in your identity provider setup:
 
 ![idp-flow](./static/idp-flow.png)
 
 With this in place, when the user that already has an LDAP account in Keycloak tries to authenticate with SSO + de-register, Keycloak will just choose the already existing LDAP account without any extra step.
+
+### CyVerse User portal
+de-register supports user portal automatic registration but for now the call and endpoint are disabled.
