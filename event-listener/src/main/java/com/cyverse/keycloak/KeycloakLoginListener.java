@@ -58,20 +58,14 @@ public class KeycloakLoginListener implements EventListenerProvider {
 
         // add user to generic groups in LDAP
         ldapService.addLdapUserToGroup(user, "everyone");
-        ldapService.addLdapUserToGroup(user, "community");
 
         // add user to groups in Keycloak
         GroupModel groupEveryone = realm.getGroupsStream()
                 .filter(g -> g.getName().equals("everyone"))
                 .findFirst()
                 .orElse(null);
-        GroupModel groupCommunity = realm.getGroupsStream()
-                .filter(g -> g.getName().equals("community"))
-                .findFirst()
-                .orElse(null);
 
         user.joinGroup(groupEveryone);
-        user.joinGroup(groupCommunity);
 
         // TODO add to discovery-environment specific group "de-preview-access" ?
         // see https://github.com/cyverse-de/portal2/blob/fcfecdfac381761d743fb4a312a6e779eec4397f/src/api/workflows/native/services.js#L23
