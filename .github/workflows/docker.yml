@@ -2,7 +2,7 @@ name: build and push docker image
 
 env:
   REGISTRY: ghcr.io
-  APP_VERSION: 0.1.0
+  APP_VERSION: 0.1.1
   IMAGE_NAME: ${{ github.repository }}
 
 on:
