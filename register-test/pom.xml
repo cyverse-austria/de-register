@@ -6,7 +6,7 @@
 
     <groupId>org.example</groupId>
     <artifactId>register-test</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -14,23 +14,34 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-bom</artifactId>
+            <version>3.20.1</version>
+            <type>pom</type>
+            <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-keycloak-admin-client</artifactId>
-            <version>2.16.5.Final</version>
+            <version>3.15.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.17.0</version> <!-- or latest -->
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.17.0</version>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
