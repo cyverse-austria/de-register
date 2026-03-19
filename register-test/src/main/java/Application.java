@@ -1,8 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import javax.ws.rs.core.Response;
-import org.apache.http.HttpStatus;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.common.util.MultivaluedHashMap;
@@ -127,7 +126,7 @@ public class Application {
 
     private static void logResponse(Response resp) {
         System.out.println("Request status: " + resp.getStatus());
-        if (resp.getStatus() != HttpStatus.SC_CREATED) {
+        if (resp.getStatus() != Response.Status.CREATED.getStatusCode()) {
             System.out.println("Got HTTP Exception from Keycloak server:");
             System.out.println(resp.readEntity(String.class));
         }
